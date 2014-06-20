@@ -81,23 +81,6 @@ func Register(user, name string) error {
 
 // Wait for offers.
 func WaitForOffers() ([]mesos.Offer, error) {
-	// Create the request message and send it.
-	callType := mesos_scheduler.Call_REQUEST
-	requestCall := &mesos_scheduler.Call {
-		FrameworkInfo: &mesos.FrameworkInfo {
-			User: &registeredUser,
-			Name: &frameworkName,
-			Id: &frameworkId,
-		},
-		Type: &callType,
-	}
-
-	err := send(requestCall)
-	if err != nil {
-		return nil, err
-	}
-
-	// Wait for the response which should be a request offer.
 	event := <-events
 
 	if *event.Type != mesos_scheduler.Event_OFFERS {
@@ -106,11 +89,52 @@ func WaitForOffers() ([]mesos.Offer, error) {
 
 	var offers []mesos.Offer
 	for _, offer := range event.Offers.Offers {
-		if *offer.FrameworkId.Value != frameworkName {
-			return nil, fmt.Errorf("Unexpected framework in offer: want %q, got %q", frameworkName, *offer.FrameworkId.Value)
+		if *offer.FrameworkId.Value != *frameworkId.Value {
+			return nil, fmt.Errorf("Unexpected framework in offer: want %q, got %q", *frameworkId.Value, *offer.FrameworkId.Value)
 		}
 		offers = append(offers, *offer)
 	}
 
 	return offers, nil
+}
+
+// TODO(dhamon): pass in request types.
+func RequestOffers() ([]mesos.Offer, error) {
+	// Create the request message and send it.
+	callType := mesos_scheduler.Call_REQUEST
+	cpus := "cpus"
+	memory := "memory"
+	scalar := mesos.Value_SCALAR
+
+	requestCall := &mesos_scheduler.Call {
+		FrameworkInfo: &mesos.FrameworkInfo {
+			User: &registeredUser,
+			Name: &frameworkName,
+			Id: &frameworkId,
+		},
+		Type: &callType,
+		Request: &mesos_scheduler.Call_Request {
+			Requests : []*mesos.Request {
+				&mesos.Request {
+					Resources: []*mesos.Resource {
+						&mesos.Resource {
+							Name: &cpus,
+							Type: &scalar,
+						},
+						&mesos.Resource {
+							Name: &memory,
+							Type: &scalar,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := send(requestCall)
+	if err != nil {
+		return nil, err
+	}
+
+	return WaitForOffers()
 }

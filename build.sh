@@ -5,7 +5,7 @@ export PATH=$PATH:$GOPATH/bin
 
 set -e
 
-for protobuf in scheduler mesos messages; do
+for protobuf in mesos messages scheduler; do
 	OUT_PATH=$GOPATH/src/$protobuf.pb
 
 	mkdir -p $OUT_PATH

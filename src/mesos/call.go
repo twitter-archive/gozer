@@ -34,6 +34,7 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 	case mesos_scheduler.Call_REQUEST:
 		return &mesos_internal.ResourceRequestMessage{
 			FrameworkId: m.FrameworkInfo.Id,
+			Requests: m.Request.Requests,
 		}, nil
 	}
 	return nil, fmt.Errorf("unimplemented call type %q", *m.Type)

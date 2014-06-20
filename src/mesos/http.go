@@ -51,7 +51,21 @@ func bytesToEvent(protoType string, data []byte) (*mesos_scheduler.Event, error)
 				MasterInfo: message.MasterInfo,
 			},
 		}, nil
+	case "mesos.internal.ResourceOffersMessage":
+		message := new(mesos_internal.ResourceOffersMessage)
+		err := proto.Unmarshal(data, message)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal %q into message of type %q: %+v", string(data), protoType, err)
+		}
+		eventType := mesos_scheduler.Event_OFFERS
+		return &mesos_scheduler.Event {
+			Type: &eventType,
+			Offers: &mesos_scheduler.Event_Offers {
+				Offers: message.Offers,
+			},
+		}, nil
 	}
+
 	return nil, fmt.Errorf("unimplemented event type %q", protoType)
 }
 
@@ -89,5 +103,5 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	events <- event
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
