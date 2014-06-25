@@ -22,6 +22,6 @@ _testmain.go
 *.exe
 *.test
 
-gozer
+/gozer
 pkg/
 src/*.pb
