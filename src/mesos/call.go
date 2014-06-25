@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"code.google.com/p/goprotobuf/proto"
 
+	"mesos.pb"
 	"messages.pb"
 	"scheduler.pb"
 )
@@ -19,6 +19,10 @@ func path(m *mesos_scheduler.Call) (string, error) {
 		return "mesos.internal.RegisterFrameworkMessage", nil
 	case mesos_scheduler.Call_REQUEST:
 		return "mesos.internal.ResourceRequestMessage", nil
+	case mesos_scheduler.Call_LAUNCH:
+		return "mesos.internal.LaunchTasksMessage", nil
+	case mesos_scheduler.Call_ACKNOWLEDGE:
+		return "mesos.internal.StatusUpdateAcknowledgementMessage", nil
 	}
 	return "", fmt.Errorf("unimplemented call type %q", *m.Type)
 }
@@ -36,7 +40,28 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 			FrameworkId: m.FrameworkInfo.Id,
 			Requests: m.Request.Requests,
 		}, nil
+
+	case mesos_scheduler.Call_LAUNCH:
+		filters := m.Launch.Filters
+		if filters == nil {
+			filters = &mesos.Filters {}
+		}
+		return &mesos_internal.LaunchTasksMessage{
+			FrameworkId: m.FrameworkInfo.Id,
+			Tasks: m.Launch.TaskInfos,
+			OfferIds: m.Launch.OfferIds,
+			Filters: filters,
+		}, nil
+
+	case mesos_scheduler.Call_ACKNOWLEDGE:
+		return &mesos_internal.StatusUpdateAcknowledgementMessage{
+			SlaveId: m.Acknowledge.SlaveId,
+			FrameworkId: m.FrameworkInfo.Id,
+			TaskId: m.Acknowledge.TaskId,
+			Uuid: m.Acknowledge.Uuid,
+		}, nil
 	}
+
 	return nil, fmt.Errorf("unimplemented call type %q", *m.Type)
 }
 
@@ -60,12 +85,7 @@ func send(m *mesos_scheduler.Call) error {
 	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", *master, *masterPort) + "/" + path
 	log.Printf("sending %+v to %s", msg, registerUrl)
 
-	// TODO(dhamon): Remove this timeout when we get Accepted from mesos.
-	client := &http.Client{
-		Transport: &http.Transport {
-			ResponseHeaderTimeout: 1 * time.Second,
-		},
-	}
+	client := &http.Client{}
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-type", "application/octet-stream")

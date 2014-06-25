@@ -51,6 +51,7 @@ func bytesToEvent(protoType string, data []byte) (*mesos_scheduler.Event, error)
 				MasterInfo: message.MasterInfo,
 			},
 		}, nil
+
 	case "mesos.internal.ResourceOffersMessage":
 		message := new(mesos_internal.ResourceOffersMessage)
 		err := proto.Unmarshal(data, message)
@@ -62,6 +63,21 @@ func bytesToEvent(protoType string, data []byte) (*mesos_scheduler.Event, error)
 			Type: &eventType,
 			Offers: &mesos_scheduler.Event_Offers {
 				Offers: message.Offers,
+			},
+		}, nil
+
+	case "mesos.internal.StatusUpdateMessage":
+		message := new(mesos_internal.StatusUpdateMessage)
+		err := proto.Unmarshal(data, message)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal %q into message of type %q: %+v", string(data), protoType, err)
+		}
+		eventType := mesos_scheduler.Event_UPDATE
+		return &mesos_scheduler.Event {
+			Type: &eventType,
+			Update: &mesos_scheduler.Event_Update {
+				Uuid: message.Update.Uuid,
+				Status: message.Update.Status,
 			},
 		}, nil
 	}

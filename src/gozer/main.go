@@ -79,6 +79,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// TODO(dhamon): add event loop to respond to tasks by launching if offers available.
+
 	taskId := 0
 	for {
 		// TODO(dhamon): wait for offers in go routine
@@ -100,6 +102,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+
 		}
 	}
 }
