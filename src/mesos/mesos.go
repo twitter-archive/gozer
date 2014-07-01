@@ -188,15 +188,15 @@ func LaunchTask(offer mesos.Offer, id, command string) error {
 		acknowledgeType := mesos_scheduler.Call_ACKNOWLEDGE
 		acknowledgeCall := &mesos_scheduler.Call{
 			FrameworkInfo: &mesos.FrameworkInfo{
-				User:	&registeredUser,
-				Name:	&frameworkName,
-				Id:	&frameworkId,
+				User: &registeredUser,
+				Name: &frameworkName,
+				Id:   &frameworkId,
 			},
 			Type: &acknowledgeType,
 			Acknowledge: &mesos_scheduler.Call_Acknowledge{
 				SlaveId: event.Update.Status.SlaveId,
-				TaskId: event.Update.Status.TaskId,
-				Uuid: event.Update.Uuid,
+				TaskId:  event.Update.Status.TaskId,
+				Uuid:    event.Update.Uuid,
 			},
 		}
 

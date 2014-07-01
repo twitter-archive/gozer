@@ -17,12 +17,20 @@ func path(m *mesos_scheduler.Call) (string, error) {
 	switch *m.Type {
 	case mesos_scheduler.Call_REGISTER:
 		return "mesos.internal.RegisterFrameworkMessage", nil
+	case mesos_scheduler.Call_REREGISTER:
+		return "mesos.internal.ReregisterFrameworkMessage", nil
+	case mesos_scheduler.Call_UNREGISTER:
+		return "mesos.internal.UnregisterFrameworkMessage", nil
 	case mesos_scheduler.Call_REQUEST:
 		return "mesos.internal.ResourceRequestMessage", nil
 	case mesos_scheduler.Call_LAUNCH:
 		return "mesos.internal.LaunchTasksMessage", nil
+	case mesos_scheduler.Call_KILL:
+		return "mesos.internal.KillTaskMessage", nil
 	case mesos_scheduler.Call_ACKNOWLEDGE:
 		return "mesos.internal.StatusUpdateAcknowledgementMessage", nil
+	case mesos_scheduler.Call_RECONCILE:
+		return "mesos.internal.ReconcileTasksMessage", nil
 	}
 	return "", fmt.Errorf("unimplemented call type %q", *m.Type)
 }
@@ -35,30 +43,52 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 			Framework: m.FrameworkInfo,
 		}, nil
 
+	case mesos_scheduler.Call_REREGISTER:
+		return &mesos_internal.ReregisterFrameworkMessage{
+			Framework: m.FrameworkInfo,
+		}, nil
+
+	case mesos_scheduler.Call_UNREGISTER:
+		return &mesos_internal.UnregisterFrameworkMessage{
+			FrameworkId: m.FrameworkInfo.Id,
+		}, nil
+
 	case mesos_scheduler.Call_REQUEST:
 		return &mesos_internal.ResourceRequestMessage{
 			FrameworkId: m.FrameworkInfo.Id,
-			Requests: m.Request.Requests,
+			Requests:    m.Request.Requests,
 		}, nil
 
 	case mesos_scheduler.Call_LAUNCH:
 		filters := m.Launch.Filters
 		if filters == nil {
-			filters = &mesos.Filters {}
+			filters = &mesos.Filters{}
 		}
 		return &mesos_internal.LaunchTasksMessage{
 			FrameworkId: m.FrameworkInfo.Id,
-			Tasks: m.Launch.TaskInfos,
-			OfferIds: m.Launch.OfferIds,
-			Filters: filters,
+			Tasks:       m.Launch.TaskInfos,
+			OfferIds:    m.Launch.OfferIds,
+			Filters:     filters,
+		}, nil
+
+	case mesos_scheduler.Call_KILL:
+		return &mesos_internal.KillTaskMessage{
+			FrameworkId: m.FrameworkInfo.Id,
+			TaskId:      m.Kill.TaskId,
 		}, nil
 
 	case mesos_scheduler.Call_ACKNOWLEDGE:
 		return &mesos_internal.StatusUpdateAcknowledgementMessage{
-			SlaveId: m.Acknowledge.SlaveId,
+			SlaveId:     m.Acknowledge.SlaveId,
 			FrameworkId: m.FrameworkInfo.Id,
-			TaskId: m.Acknowledge.TaskId,
-			Uuid: m.Acknowledge.Uuid,
+			TaskId:      m.Acknowledge.TaskId,
+			Uuid:        m.Acknowledge.Uuid,
+		}, nil
+
+	case mesos_scheduler.Call_RECONCILE:
+		return &mesos_internal.ReconcileTasksMessage{
+			FrameworkId: m.FrameworkInfo.Id,
+			Statuses:    m.Reconcile.Statuses,
 		}, nil
 	}
 
@@ -102,4 +132,3 @@ func send(m *mesos_scheduler.Call) error {
 
 	return nil
 }
-
