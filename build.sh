@@ -5,6 +5,8 @@ export PATH=$PATH:$GOPATH/bin
 
 set -e
 
+go get code.google.com/p/goprotobuf/{proto,protoc-gen-go}
+
 for protobuf in mesos messages scheduler; do
 	OUT_PATH=$GOPATH/src/$protobuf.pb
 
