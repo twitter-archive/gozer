@@ -4,7 +4,7 @@ export GOPATH=`pwd`
 export PATH=$PATH:$GOPATH/bin
 
 # Check for protoc
-protoc >/dev/null 2>&1
+protoc --help >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "Can not find 'protoc' binary in \$PATH" 1>&2
 	exit 1
