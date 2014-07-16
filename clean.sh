@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 rm -rf src/*.pb
 rm -f gozer
