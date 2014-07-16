@@ -28,4 +28,4 @@ done
 
 cd $GOPATH
 go install mesos
-go build gozer
+go install gozer
