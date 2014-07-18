@@ -592,6 +592,7 @@ func (m *ResourceOffersMessage) GetPids() []string {
 
 type LaunchTasksMessage struct {
 	FrameworkId      *mesos.FrameworkID `protobuf:"bytes,1,req,name=framework_id" json:"framework_id,omitempty"`
+	OfferId          *mesos.OfferID     `protobuf:"bytes,2,opt,name=offer_id" json:"offer_id,omitempty"`
 	Tasks            []*mesos.TaskInfo  `protobuf:"bytes,3,rep,name=tasks" json:"tasks,omitempty"`
 	Filters          *mesos.Filters     `protobuf:"bytes,5,req,name=filters" json:"filters,omitempty"`
 	OfferIds         []*mesos.OfferID   `protobuf:"bytes,6,rep,name=offer_ids" json:"offer_ids,omitempty"`
@@ -605,6 +606,13 @@ func (*LaunchTasksMessage) ProtoMessage()    {}
 func (m *LaunchTasksMessage) GetFrameworkId() *mesos.FrameworkID {
 	if m != nil {
 		return m.FrameworkId
+	}
+	return nil
+}
+
+func (m *LaunchTasksMessage) GetOfferId() *mesos.OfferID {
+	if m != nil {
+		return m.OfferId
 	}
 	return nil
 }
@@ -810,12 +818,6 @@ func (m *LostSlaveMessage) GetSlaveId() *mesos.SlaveID {
 	return nil
 }
 
-// Allows the framework to query the status for non-terminal tasks.
-// This causes the master to send back the latest task status for
-// each task in 'statuses', if possible. Tasks that are no longer
-// known will result in a TASK_LOST update. If statuses is empty,
-// then the master will send the latest status for each task
-// currently known.
 type ReconcileTasksMessage struct {
 	FrameworkId      *mesos.FrameworkID  `protobuf:"bytes,1,req,name=framework_id" json:"framework_id,omitempty"`
 	Statuses         []*mesos.TaskStatus `protobuf:"bytes,2,rep,name=statuses" json:"statuses,omitempty"`

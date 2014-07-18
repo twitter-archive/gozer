@@ -1499,14 +1499,13 @@ func (m *TaskInfo) GetData() []byte {
 // *
 // Describes the current status of a task.
 type TaskStatus struct {
-	TaskId           *TaskID     `protobuf:"bytes,1,req,name=task_id" json:"task_id,omitempty"`
-	State            *TaskState  `protobuf:"varint,2,req,name=state,enum=mesos.TaskState" json:"state,omitempty"`
-	Message          *string     `protobuf:"bytes,4,opt,name=message" json:"message,omitempty"`
-	Data             []byte      `protobuf:"bytes,3,opt,name=data" json:"data,omitempty"`
-	SlaveId          *SlaveID    `protobuf:"bytes,5,opt,name=slave_id" json:"slave_id,omitempty"`
-	ExecutorId       *ExecutorID `protobuf:"bytes,7,opt,name=executor_id" json:"executor_id,omitempty"`
-	Timestamp        *float64    `protobuf:"fixed64,6,opt,name=timestamp" json:"timestamp,omitempty"`
-	XXX_unrecognized []byte      `json:"-"`
+	TaskId           *TaskID    `protobuf:"bytes,1,req,name=task_id" json:"task_id,omitempty"`
+	State            *TaskState `protobuf:"varint,2,req,name=state,enum=mesos.TaskState" json:"state,omitempty"`
+	Message          *string    `protobuf:"bytes,4,opt,name=message" json:"message,omitempty"`
+	Data             []byte     `protobuf:"bytes,3,opt,name=data" json:"data,omitempty"`
+	SlaveId          *SlaveID   `protobuf:"bytes,5,opt,name=slave_id" json:"slave_id,omitempty"`
+	Timestamp        *float64   `protobuf:"fixed64,6,opt,name=timestamp" json:"timestamp,omitempty"`
+	XXX_unrecognized []byte     `json:"-"`
 }
 
 func (m *TaskStatus) Reset()         { *m = TaskStatus{} }
@@ -1544,13 +1543,6 @@ func (m *TaskStatus) GetData() []byte {
 func (m *TaskStatus) GetSlaveId() *SlaveID {
 	if m != nil {
 		return m.SlaveId
-	}
-	return nil
-}
-
-func (m *TaskStatus) GetExecutorId() *ExecutorID {
-	if m != nil {
-		return m.ExecutorId
 	}
 	return nil
 }
@@ -1885,7 +1877,7 @@ func (m *ACL_HTTPPut) GetUrls() *ACL_Entity {
 	return nil
 }
 
-// *
+//
 // Collection of ACL.
 //
 // Each authorization request is evaluated against the ACLs in the order
