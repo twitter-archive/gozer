@@ -1,6 +1,6 @@
 // This is here to have 'go test ...' "ignore" this directory
 
-package ignore_me
+package proto
 
 import (
 	"testing"
