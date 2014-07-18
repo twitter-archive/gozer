@@ -3,7 +3,6 @@ set -o errexit ; set -o nounset
 
 MESOS_TAG="0.19.0"
 MESOS_REPO="http://git-wip-us.apache.org/repos/asf/mesos.git"
-MESOS_REPO="$HOME/tmp/apache-mesos"
 
 
 error() { exec 1>&2 ; echo "$@" ; exit 1 ; }
