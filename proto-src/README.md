@@ -22,4 +22,15 @@ shell$ ls -al $GOPATH/bin/protoc-gen-go
 Building Protobuf definitions
 -----------------------------
 
-TODO(weingart): more information here
+The `build.sh` script should do the necessary steps in order to build a set of protobuf definitions.  It clones a full [Apache Mesos](http://mesos.apache.org/) repository, so it may take some time to complete.  Once complete, all newly generated files are located in `../proto/`.  The general workflow will look something like:
+
+```bash
+shell$ cd .../proto-src
+proto-src$ ./build.sh
+# A bunch of output here... :)
+proto-src$ git add ../proto
+proto-src$ git commit -m 'Update protobufs to version ...'
+# Push, etc
+```
+
+**Note: This should only be necessary when a new version of Mesos is released.**
