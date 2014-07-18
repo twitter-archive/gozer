@@ -4,6 +4,7 @@
 package proto
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -12,5 +13,6 @@ func GitSHA() string {
 }
 
 func GitTime() time.Time {
-	return time.Unix(1401914422, 0)
+	ts, _ := strconv.ParseInt("1401914422", 10, 64)
+	return time.Unix(ts, 0)
 }
