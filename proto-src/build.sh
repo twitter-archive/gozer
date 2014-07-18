@@ -23,6 +23,9 @@ for file in *.proto; do
 
     mkdir -p "../proto/${base}.pb"
     protoc --go_out="../proto/${base}.pb" "${base}.proto"
+
+    sed -i.bak -f sed-fix-mesos-pb-import.txt "../proto/${base}.pb/${base}.pb.go"
+    rm -f "../proto/${base}.pb/${base}.pb.go.bak"
 done
 
 exit 0
