@@ -1,5 +1,6 @@
-gozer [![build status](https://secure.travis-ci.org/twitter/gozer?branch=master)](http://travis-ci.org/twitter/gozer)
+gozer
 =====
+[![Build Status](https://travis-ci.org/twitter/gozer.svg?branch=master)](https://travis-ci.org/twitter/gozer)
 
 Prototype mesos framework using new low-level API built in Go.
 
