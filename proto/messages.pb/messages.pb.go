@@ -68,7 +68,7 @@ package mesos_internal
 
 import proto "code.google.com/p/goprotobuf/proto"
 import math "math"
-import mesos "mesos.pb"
+import mesos "github.com/twitter/gozer/proto/mesos.pb"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
