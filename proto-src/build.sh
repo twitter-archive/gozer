@@ -34,7 +34,6 @@ echo "Commit timestamp = ${mesos_ts}"
 for file in $(find mesos-repo -name \*.proto | fgrep -v 3rdparty/libprocess/3rdparty/stout/tests); do
     cp "${file}" .
 done
-rm -rf mesos-repo
 
 # Build all the .proto files
 for file in *.proto; do
@@ -47,6 +46,12 @@ for file in *.proto; do
     sed -i.bak -f sed-fix-mesos-pb-import.txt "../proto/${base}.pb/${base}.pb.go"
     rm -f "../proto/${base}.pb/${base}.pb.go.bak"
 done
+
+# Generate proto.go file so SHA/DateTime can be queried
+sed -e "s/@GIT_SHA@/${mesos_sha}/" -e "s/@GIT_TS@/${mesos_ts}/" < proto-template.go > ../proto/proto.go
+
+# Cleanup
+rm -rf mesos-repo
 rm -f *.proto
 
 exit 0
