@@ -74,7 +74,20 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	log.Printf("Registering...")
-	err := mesos.Register(*user, frameworkName)
+	master, err := mesos.New(&mesos.MesosMasterConfig{
+		FrameworkName:  "gozer",
+		RegisteredUser: "gozer",
+		Masters: []mesos.MesosMasterLocation{mesos.MesosMasterLocation{
+			Hostname: "localhost",
+			Port:     5050,
+		}},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO(weingart): should really be "go master.Run()" here
+	err = master.Register(*user, frameworkName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,7 +98,7 @@ func main() {
 	for {
 		// TODO(dhamon): wait for offers in go routine
 		log.Printf("Waiting for offers...")
-		offers, err := mesos.WaitForOffers()
+		offers, err := master.WaitForOffers()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -97,7 +110,7 @@ func main() {
 			task := <-tasks
 
 			// TODO(dhamon): Decline offers if resources don't match.
-			err = mesos.LaunchTask(offer, fmt.Sprintf("gozer-task-%d", taskId), task.Command)
+			err = master.LaunchTaskOld(offer, fmt.Sprintf("gozer-task-%d", taskId), task.Command)
 			taskId += 1
 			if err != nil {
 				log.Fatal(err)

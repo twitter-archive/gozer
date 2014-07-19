@@ -12,25 +12,17 @@ const (
 	port = 8888
 )
 
-var (
-//	port       = flag.Int("port", 4242, "Port to listen on for HTTP endpoint")
-)
-
-func init() {
-	http.HandleFunc("/", rootHandler)
-	httpWaitGroup.Add(1)
-	go startServing()
-}
-
-func startServing() {
+// TODO(weingart): create a htt.ServeMux and register a healthcheck URI on this server,
+// which can then be used by the state machine to wait until this endpoint is up and ready
+// to receive events/calls from the master.  The original SyncGroup was racy too.
+func startServing(m *MesosMaster) {
 	log.Printf("listening on port %d", port)
-	httpWaitGroup.Done()
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), m); err != nil {
 		log.Fatalf("failed to start listening on port %d", port)
 	}
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func (m *MesosMaster) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -40,10 +32,10 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	pathElements := strings.Split(r.URL.Path, "/")
 
-	if pathElements[1] != frameworkName {
+	if pathElements[1] != m.config.FrameworkName {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", frameworkName, pathElements[1])))
-		log.Printf("received request with unexpected path. want %q, got %q: %+v", frameworkName, pathElements[1], r)
+		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", m.config.FrameworkName, pathElements[1])))
+		log.Printf("received request with unexpected path. want %q, got %q: %+v", m.config.FrameworkName, pathElements[1], r)
 		return
 	}
 

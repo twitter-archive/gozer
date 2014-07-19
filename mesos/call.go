@@ -15,14 +15,17 @@ import (
 
 var (
 	callTypeMap = map[mesos_scheduler.Call_Type]string{
-		mesos_scheduler.Call_REGISTER:    "mesos.internal.RegisterFrameworkMessage",
-		mesos_scheduler.Call_REREGISTER:  "mesos.internal.ReregisterFrameworkMessage",
-		mesos_scheduler.Call_UNREGISTER:  "mesos.internal.UnregisterFrameworkMessage",
-		mesos_scheduler.Call_REQUEST:     "mesos.internal.ResourceRequestMessage",
+		mesos_scheduler.Call_REGISTER:   "mesos.internal.RegisterFrameworkMessage",
+		mesos_scheduler.Call_REREGISTER: "mesos.internal.ReregisterFrameworkMessage",
+		mesos_scheduler.Call_UNREGISTER: "mesos.internal.UnregisterFrameworkMessage",
+		mesos_scheduler.Call_REQUEST:    "mesos.internal.ResourceRequestMessage",
+		// mesos_scheduler.Call_DECLINE
+		// mesos_scheduler.Call_REVIVE
 		mesos_scheduler.Call_LAUNCH:      "mesos.internal.LaunchTasksMessage",
 		mesos_scheduler.Call_KILL:        "mesos.internal.KillTaskMessage",
 		mesos_scheduler.Call_ACKNOWLEDGE: "mesos.internal.StatusUpdateAcknowledgementMessage",
 		mesos_scheduler.Call_RECONCILE:   "mesos.internal.ReconcileTasksMessage",
+		// mesos_scheduler.Call_MESSAGE
 	}
 )
 
@@ -94,11 +97,11 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 	return nil, fmt.Errorf("unimplemented call type %q", *m.Type)
 }
 
-func send(m *mesos_scheduler.Call) error {
+func (m *MesosMaster) send(ms *mesos_scheduler.Call) error {
 	// TODO(dhamon): Remove this call when mesos listens for Call directly.
-	msg, err := callToMessage(m)
+	msg, err := callToMessage(ms)
 	if err != nil {
-		return fmt.Errorf("failed to convert Call %+v: %+v", m, err)
+		return fmt.Errorf("failed to convert Call %+v: %+v", ms, err)
 	}
 
 	buffer, err := proto.Marshal(msg)
@@ -106,9 +109,9 @@ func send(m *mesos_scheduler.Call) error {
 		return fmt.Errorf("failed to marshal Message %+v: %+v", msg, err)
 	}
 
-	path, err := path(m)
+	path, err := path(ms)
 	if err != nil {
-		return fmt.Errorf("failed to get path for Call %+v: %+v", m, err)
+		return fmt.Errorf("failed to get path for Call %+v: %+v", ms, err)
 	}
 
 	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", *master, *masterPort) + "/" + path
@@ -118,7 +121,7 @@ func send(m *mesos_scheduler.Call) error {
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-type", "application/octet-stream")
-	req.Header.Add("Libprocess-From", fmt.Sprintf("gozer@%s:%d", ip, port))
+	req.Header.Add("Libprocess-From", fmt.Sprintf("gozer@%s:%d", m.localIp, port))
 
 	resp, err := client.Do(req)
 	if err != nil {
