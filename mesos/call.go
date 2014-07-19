@@ -13,25 +13,24 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func path(m *mesos_scheduler.Call) (string, error) {
-	switch *m.Type {
-	case mesos_scheduler.Call_REGISTER:
-		return "mesos.internal.RegisterFrameworkMessage", nil
-	case mesos_scheduler.Call_REREGISTER:
-		return "mesos.internal.ReregisterFrameworkMessage", nil
-	case mesos_scheduler.Call_UNREGISTER:
-		return "mesos.internal.UnregisterFrameworkMessage", nil
-	case mesos_scheduler.Call_REQUEST:
-		return "mesos.internal.ResourceRequestMessage", nil
-	case mesos_scheduler.Call_LAUNCH:
-		return "mesos.internal.LaunchTasksMessage", nil
-	case mesos_scheduler.Call_KILL:
-		return "mesos.internal.KillTaskMessage", nil
-	case mesos_scheduler.Call_ACKNOWLEDGE:
-		return "mesos.internal.StatusUpdateAcknowledgementMessage", nil
-	case mesos_scheduler.Call_RECONCILE:
-		return "mesos.internal.ReconcileTasksMessage", nil
+var (
+	callTypeMap = map[mesos_scheduler.Call_Type]string{
+		mesos_scheduler.Call_REGISTER:    "mesos.internal.RegisterFrameworkMessage",
+		mesos_scheduler.Call_REREGISTER:  "mesos.internal.ReregisterFrameworkMessage",
+		mesos_scheduler.Call_UNREGISTER:  "mesos.internal.UnregisterFrameworkMessage",
+		mesos_scheduler.Call_REQUEST:     "mesos.internal.ResourceRequestMessage",
+		mesos_scheduler.Call_LAUNCH:      "mesos.internal.LaunchTasksMessage",
+		mesos_scheduler.Call_KILL:        "mesos.internal.KillTaskMessage",
+		mesos_scheduler.Call_ACKNOWLEDGE: "mesos.internal.StatusUpdateAcknowledgementMessage",
+		mesos_scheduler.Call_RECONCILE:   "mesos.internal.ReconcileTasksMessage",
 	}
+)
+
+func path(m *mesos_scheduler.Call) (string, error) {
+	if p, ok := callTypeMap[*m.Type]; ok {
+		return p, nil
+	}
+
 	return "", fmt.Errorf("unimplemented call type %q", *m.Type)
 }
 
