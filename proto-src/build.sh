@@ -47,7 +47,10 @@ for file in *.proto; do
 done
 
 # Generate proto.go file so SHA/DateTime can be queried
-sed -e "s/@GIT_SHA@/${mesos_sha}/" -e "s/@GIT_TS@/${mesos_ts}/" < proto-template.go > ../proto/proto.go
+sed -e "s/@GIT_SHA@/${mesos_sha}/" \
+    -e "s/@GIT_TS@/${mesos_ts}/" \
+    -e "s/@GIT_TAG@/${MESOS_TAG}/" \
+    < proto-template.go > ../proto/proto.go
 
 # Cleanup
 rm -rf mesos-repo
