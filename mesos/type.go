@@ -20,8 +20,9 @@ type MesosMasterConfig struct {
 type MesosMaster struct {
 	sync.RWMutex
 
-	config  MesosMasterConfig
-	localIp string
+	config    MesosMasterConfig
+	localIp   string
+	localPort int
 
 	frameworkId mesos.FrameworkID
 

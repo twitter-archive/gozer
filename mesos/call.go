@@ -114,14 +114,14 @@ func (m *MesosMaster) send(ms *mesos_scheduler.Call) error {
 		return fmt.Errorf("failed to get path for Call %+v: %+v", ms, err)
 	}
 
-	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", *master, *masterPort) + "/" + path
+	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", m.config.Masters[0].Hostname, m.config.Masters[0].Port) + "/" + path
 	log.Printf("sending %+v to %s", msg, registerUrl)
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-type", "application/octet-stream")
-	req.Header.Add("Libprocess-From", fmt.Sprintf("gozer@%s:%d", m.localIp, port))
+	req.Header.Add("Libprocess-From", fmt.Sprintf("gozer@%s:%d", m.localIp, m.localPort))
 
 	resp, err := client.Do(req)
 	if err != nil {

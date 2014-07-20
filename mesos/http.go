@@ -8,17 +8,20 @@ import (
 	"strings"
 )
 
-const (
-	port = 8888
-)
-
-// TODO(weingart): create a htt.ServeMux and register a healthcheck URI on this server,
-// which can then be used by the state machine to wait until this endpoint is up and ready
-// to receive events/calls from the master.  The original SyncGroup was racy too.
+// TODO(weingart): use /health by the state machine to wait until this endpoint is up and ready
+// to receive events/calls from the master.  The original SyncGroup was racy.
 func startServing(m *MesosMaster) {
-	log.Printf("listening on port %d", port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), m); err != nil {
-		log.Fatalf("failed to start listening on port %d", port)
+
+	// TODO(weingart): Grab an emphemeral port for this instead and toss it into MesosMaster
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", func(rw http.ResponseWriter, req *http.Request) {
+		fmt.Fprint(rw, "OK\r\n")
+	})
+	mux.Handle("/", m)
+
+	log.Printf("listening on port %d", m.localPort)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", m.localPort), mux); err != nil {
+		log.Fatalf("failed to start listening on port %d", m.localPort)
 	}
 }
 

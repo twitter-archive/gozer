@@ -1,7 +1,6 @@
 package mesos
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -12,9 +11,6 @@ import (
 )
 
 var (
-	master     = flag.String("master", "localhost", "Hostname of the master")
-	masterPort = flag.Int("masterPort", 5050, "Port of the master")
-
 	events = make(chan *mesos_scheduler.Event)
 )
 
@@ -36,9 +32,11 @@ func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
 		receivedEvent: make(chan int),
 		userCommands:  make([]*userCmd, 0),
 		localIp:       addrs[0],
+		localPort:     8888, // TODO(weingart): use ephemeral port
 	}
 
 	// Start up Framework http endpoint
+	// TODO(weingart): move into state machine as part of m.Run()
 	go startServing(m)
 
 	return

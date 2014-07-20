@@ -16,8 +16,10 @@ const (
 )
 
 var (
-	user = flag.String("user", "", "The user to register as")
-	port = flag.Int("port", 4343, "Port to listen on for HTTP endpoint")
+	user       = flag.String("user", "", "The user to register as")
+	port       = flag.Int("port", 4343, "Port to listen on for HTTP endpoint")
+	master     = flag.String("master", "localhost", "Hostname of the master")
+	masterPort = flag.Int("masterPort", 5050, "Port of the master")
 
 	tasks = make(chan Task)
 )
@@ -78,8 +80,8 @@ func main() {
 		FrameworkName:  "gozer",
 		RegisteredUser: "gozer",
 		Masters: []mesos.MesosMasterLocation{mesos.MesosMasterLocation{
-			Hostname: "localhost",
-			Port:     5050,
+			Hostname: *master,
+			Port:     *masterPort,
 		}},
 	})
 	if err != nil {
