@@ -27,12 +27,11 @@ func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
 	}
 
 	m = &MesosMaster{
-		config:        *mc,
-		sendCommand:   make(chan int),
-		receivedEvent: make(chan int),
-		userCommands:  make([]*userCmd, 0),
-		localIp:       addrs[0],
-		localPort:     8888, // TODO(weingart): use ephemeral port
+		config:    *mc,
+		command:   make(chan func(*MesosMaster) error),
+		event:     make(chan int),
+		localIp:   addrs[0],
+		localPort: 8888, // TODO(weingart): use ephemeral port
 	}
 
 	// Start up Framework http endpoint

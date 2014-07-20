@@ -15,8 +15,9 @@ func (m *MesosMaster) Run() {
 }
 
 func stateInit(m *MesosMaster) stateFn {
-	// ...
-	return stateStop
+	log.Print("INIT: Starting framework:", m)
+
+	return stateRegistering
 }
 
 func stateStop(m *MesosMaster) stateFn {
@@ -25,16 +26,7 @@ func stateStop(m *MesosMaster) stateFn {
 }
 
 func stateRegistering(m *MesosMaster) stateFn {
-	// ...
-	return nil
-}
+	log.Print("REGISTERING: Trying to register framework:", m)
 
-func stateSendCommand(m *MesosMaster) stateFn {
-	// ...
-	return nil
-}
-
-func stateReceiveEvent(m *MesosMaster) stateFn {
-	// ...
-	return nil
+	return stateReady
 }

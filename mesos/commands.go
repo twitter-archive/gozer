@@ -8,28 +8,40 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-type userCmd struct {
-	command cmdCode
-	task    MesosTask
-}
+func (m *MesosMaster) LaunchTask(offer mesos.Offer, task MesosTask) error {
 
-type cmdCode int
+	m.command <- func(fm *MesosMaster) error {
 
-const (
-	cmdLaunch cmdCode = iota
-	cmdKill
-)
+		launchType := mesos_scheduler.Call_LAUNCH
+		launchCall := &mesos_scheduler.Call{
+			FrameworkInfo: &mesos.FrameworkInfo{
+				User: &m.config.RegisteredUser,
+				Name: &m.config.FrameworkName,
+				Id:   &m.frameworkId,
+			},
+			Type: &launchType,
+			Launch: &mesos_scheduler.Call_Launch{
+				TaskInfos: []*mesos.TaskInfo{
+					&mesos.TaskInfo{
+						Name: &task.Command,
+						TaskId: &mesos.TaskID{
+							Value: &task.Id,
+						},
+						SlaveId:   offer.SlaveId,
+						Resources: offer.Resources,
+						Command: &mesos.CommandInfo{
+							Value: &task.Command,
+						},
+					},
+				},
+				OfferIds: []*mesos.OfferID{
+					offer.Id,
+				},
+			},
+		}
 
-func (m *MesosMaster) LaunchTask(task MesosTask) error {
-	m.Lock()
-	defer m.Unlock()
-
-	cmd := &userCmd{
-		command: cmdLaunch,
-		task:    task,
+		return m.send(launchCall)
 	}
-	m.userCommands = append(m.userCommands, cmd)
-	m.sendCommand <- len(m.userCommands)
 
 	return nil
 }

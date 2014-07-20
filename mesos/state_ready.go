@@ -13,10 +13,21 @@ func stateReady(m *MesosMaster) stateFn {
 	case <-time.Tick(time.Minute):
 		return stateHeartbeat
 
-	case <-m.sendCommand:
+	case cmd := <-m.command:
+		stateSendCommand := func(fm *MesosMaster) stateFn {
+			if err := cmd(fm); err != nil {
+				log.Print("Error:", err)
+				return stateError
+			}
+			return stateReady
+		}
 		return stateSendCommand
 
-	case <-m.receivedEvent:
+	case <-m.event:
+		stateReceiveEvent := func(fm *MesosMaster) stateFn {
+
+			return stateReady
+		}
 		return stateReceiveEvent
 	}
 }

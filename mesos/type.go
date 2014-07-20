@@ -26,12 +26,11 @@ type MesosMaster struct {
 
 	frameworkId mesos.FrameworkID
 
-	sendCommand   chan int
-	receivedEvent chan int
-
-	userCommands []*userCmd
+	command chan func(*MesosMaster) error
+	event   chan int
 }
 
 type MesosTask struct {
+	Id      string
 	Command string
 }

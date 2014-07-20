@@ -89,6 +89,7 @@ func main() {
 	}
 
 	// TODO(weingart): should really be "go master.Run()" here
+	go master.Run()
 	err = master.Register(*user, frameworkName)
 	if err != nil {
 		log.Fatal(err)
