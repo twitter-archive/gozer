@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-// TODO(weingart): use /health by the state machine to wait until this endpoint is up and ready
-// to receive events/calls from the master.  The original SyncGroup was racy.
 func startServing(m *MesosMaster) {
 
 	// TODO(weingart): Grab an emphemeral port for this instead and toss it into MesosMaster
