@@ -11,10 +11,6 @@ import (
 	"github.com/twitter/gozer/mesos"
 )
 
-const (
-	frameworkName = "gozer"
-)
-
 var (
 	user       = flag.String("user", "", "The user to register as")
 	port       = flag.Int("port", 4343, "Port to listen on for HTTP endpoint")
@@ -78,7 +74,7 @@ func main() {
 	log.Printf("Registering...")
 	master, err := mesos.New(&mesos.MesosMasterConfig{
 		FrameworkName:  "gozer",
-		RegisteredUser: "gozer",
+		RegisteredUser: "nobody",
 		Masters: []mesos.MesosMasterLocation{mesos.MesosMasterLocation{
 			Hostname: *master,
 			Port:     *masterPort,
@@ -98,6 +94,20 @@ func main() {
 		// TODO(dhamon): add offers to list and consume as tasks come in.
 		for offer := range master.Offers {
 			log.Printf("Received offer %+v", *offer)
+
+			// Launch debug "/bin/true" task
+			if taskId == 0 {
+				trueTask := &mesos.MesosTask{
+					Id:      fmt.Sprintf("gozer-task-%d", taskId),
+					Command: "/bin/true",
+				}
+				err = master.LaunchTask(*offer, trueTask)
+				if err != nil {
+					log.Fatal(err)
+				}
+				continue
+			}
+
 			log.Printf("Waiting for tasks...")
 			task := <-tasks
 

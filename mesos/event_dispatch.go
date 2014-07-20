@@ -28,7 +28,7 @@ func (m *MesosMaster) eventDispatch(event *mesos_scheduler.Event) error {
 
 	default:
 		log.Print("Unexpected event: ", event)
-		return fmt.Errorf("Unexpected evet: %+u", event)
+		return fmt.Errorf("Unexpected event type: %q", event.Type)
 	}
 
 	return nil

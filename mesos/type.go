@@ -1,8 +1,6 @@
 package mesos
 
 import (
-	"sync"
-
 	"github.com/twitter/gozer/proto/mesos.pb"
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
@@ -19,8 +17,6 @@ type MesosMasterConfig struct {
 }
 
 type MesosMaster struct {
-	sync.RWMutex
-
 	config    MesosMasterConfig
 	localIp   string
 	localPort int

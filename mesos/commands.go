@@ -8,7 +8,7 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func (m *MesosMaster) LaunchTask(offer mesos.Offer, task MesosTask) error {
+func (m *MesosMaster) LaunchTask(offer mesos.Offer, task *MesosTask) error {
 
 	m.command <- func(fm *MesosMaster) error {
 

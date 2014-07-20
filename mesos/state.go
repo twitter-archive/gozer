@@ -4,7 +4,8 @@ import (
 	"log"
 )
 
-// A state function is a function that returns a state function
+// A state function is a function that does stuff, and
+// then returns the next state function to be invoked.
 type stateFn func(*MesosMaster) stateFn
 
 // Run the state machine
