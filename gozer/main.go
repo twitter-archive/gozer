@@ -35,8 +35,8 @@ const (
 	TaskState_FINISHED
 )
 
-func (t *TaskState) String() string {
-	switch *t {
+func (t TaskState) String() string {
+	switch t {
 	case TaskState_INIT:
 		return "INIT"
 	case TaskState_STARTING:
@@ -93,7 +93,7 @@ func (t *TaskStore) UpdateTask(taskId string, state TaskState) error {
 		return fmt.Errorf("Task Id '%s' not found, update ignored", taskId)
 	}
 
-	log.Printf("Task '%s' State %s -> %s", taskId, &task.State, &state)
+	log.Printf("Task '%s' State %s -> %s", taskId, task.State, state)
 	task.State = state
 
 	return nil
