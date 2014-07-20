@@ -198,16 +198,16 @@ func main() {
 	go master.Run()
 
 	// Launch simple /bin/true after a little while
-	// go func() {
-	// 	time.Sleep(10 * time.Second)
+	go func() {
+		time.Sleep(10 * time.Second)
 
-	trueTask := &Task{
-		Id:      "gozer-bin-true",
-		Command: "/bin/true",
-	}
+		trueTask := &Task{
+			Id:      "gozer-bin-true",
+			Command: "/bin/true",
+		}
 
-	taskstore.AddTask(trueTask)
-	// }()
+		taskstore.AddTask(trueTask)
+	}()
 
 	// Shephard all our tasks
 	//
