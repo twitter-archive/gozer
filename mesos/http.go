@@ -57,7 +57,7 @@ func (m *MesosMaster) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	events <- event
+	m.events <- event
 
 	w.WriteHeader(http.StatusOK)
 }

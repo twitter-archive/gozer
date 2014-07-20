@@ -23,7 +23,7 @@ func stateReady(m *MesosMaster) stateFn {
 		}
 		return stateSendCommand
 
-	case <-m.event:
+	case <-m.events:
 		stateReceiveEvent := func(fm *MesosMaster) stateFn {
 
 			return stateReady

@@ -10,10 +10,6 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-var (
-	events = make(chan *mesos_scheduler.Event)
-)
-
 func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
 
 	name, err := os.Hostname()
@@ -29,7 +25,7 @@ func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
 	m = &MesosMaster{
 		config:    *mc,
 		command:   make(chan func(*MesosMaster) error),
-		event:     make(chan int),
+		events:    make(chan *mesos_scheduler.Event, 100),
 		localIp:   addrs[0],
 		localPort: 8888, // TODO(weingart): use ephemeral port
 	}
@@ -61,7 +57,7 @@ func (m *MesosMaster) Register(user, name string) error {
 	}
 
 	// Wait for HTTP endpoint to receive registration message.
-	event := <-events
+	event := <-m.events
 
 	if *event.Type != mesos_scheduler.Event_REGISTERED {
 		return fmt.Errorf("Unexpected event type: want %q, got %+v", mesos_scheduler.Event_REGISTERED, *event.Type)
@@ -76,7 +72,7 @@ func (m *MesosMaster) Register(user, name string) error {
 // TODO(dhamon): Refactor below into an event loop that tracks task updates and offers.
 // Wait for offers.
 func (m *MesosMaster) WaitForOffers() ([]mesos.Offer, error) {
-	event := <-events
+	event := <-m.events
 
 	if *event.Type != mesos_scheduler.Event_OFFERS {
 		return nil, fmt.Errorf("Unexpected event type: want %q, got %+v", mesos_scheduler.Event_OFFERS, *event.Type)

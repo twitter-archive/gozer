@@ -89,7 +89,7 @@ func (m *MesosMaster) LaunchTaskOld(offer mesos.Offer, id, command string) error
 
 	// TODO(dhamon): Don't wait for the task to finish.
 	for {
-		event := <-events
+		event := <-m.events
 
 		if *event.Type != mesos_scheduler.Event_UPDATE {
 			return fmt.Errorf("unexpected event type: want %q, got %+v", mesos_scheduler.Event_UPDATE, *event.Type)

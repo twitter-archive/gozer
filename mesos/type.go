@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/twitter/gozer/proto/mesos.pb"
+	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
 type MesosMasterLocation struct {
@@ -27,7 +28,7 @@ type MesosMaster struct {
 	frameworkId mesos.FrameworkID
 
 	command chan func(*MesosMaster) error
-	event   chan int
+	events  chan *mesos_scheduler.Event
 }
 
 type MesosTask struct {
