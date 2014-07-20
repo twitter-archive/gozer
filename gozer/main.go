@@ -88,32 +88,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// TODO(weingart): should really be "go master.Run()" here
+	// Start Framework engine
 	go master.Run()
-	err = master.Register(*user, frameworkName)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// TODO(dhamon): add event loop to respond to tasks by launching if offers available.
-
 	taskId := 0
 	for {
-		// TODO(dhamon): wait for offers in go routine
-		log.Printf("Waiting for offers...")
-		offers, err := master.WaitForOffers()
-		if err != nil {
-			log.Fatal(err)
-		}
 
 		// TODO(dhamon): add offers to list and consume as tasks come in.
-		for _, offer := range offers {
-			log.Printf("Received offer %+v", offer)
+		for offer := range master.Offers {
+			log.Printf("Received offer %+v", *offer)
 			log.Printf("Waiting for tasks...")
 			task := <-tasks
 
 			// TODO(dhamon): Decline offers if resources don't match.
-			err = master.LaunchTaskOld(offer, fmt.Sprintf("gozer-task-%d", taskId), task.Command)
+			err = master.LaunchTaskOld(*offer, fmt.Sprintf("gozer-task-%d", taskId), task.Command)
 			taskId += 1
 			if err != nil {
 				log.Fatal(err)

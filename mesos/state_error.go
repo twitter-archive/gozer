@@ -15,9 +15,6 @@ const (
 )
 
 func stateError(m *MesosMaster) stateFn {
-	m.RLock()
-	defer m.Unlock()
-
 	// Handle any type of error state
 	log.Print("STATE: Error, MesosMaster = ", m)
 	return stateStop

@@ -28,7 +28,10 @@ type MesosMaster struct {
 	frameworkId mesos.FrameworkID
 
 	command chan func(*MesosMaster) error
-	events  chan *mesos_scheduler.Event
+	// TODO(weingart): move to internal type to handle master disconnect, error events/etc.
+	events chan *mesos_scheduler.Event
+
+	Offers chan *mesos.Offer
 }
 
 type MesosTask struct {
