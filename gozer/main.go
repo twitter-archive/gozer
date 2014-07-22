@@ -184,7 +184,7 @@ func main() {
 	log.Printf("Registering...")
 	master, err := mesos.New(&mesos.MesosMasterConfig{
 		FrameworkName:  "gozer",
-		RegisteredUser: "nobody",
+		RegisteredUser: *user,
 		Masters: []mesos.MesosMasterLocation{mesos.MesosMasterLocation{
 			Hostname: *master,
 			Port:     *masterPort,
