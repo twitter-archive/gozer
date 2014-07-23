@@ -38,40 +38,25 @@ func (m *MesosMaster) eventDispatch(event *mesos_scheduler.Event) error {
 	case mesos_scheduler.Event_UPDATE:
 		log.Print("Event UPDATE: ", event)
 
-		acknowledgeType := mesos_scheduler.Call_ACKNOWLEDGE
-		acknowledgeCall := &mesos_scheduler.Call{
-			FrameworkInfo: &mesos.FrameworkInfo{
-				User: &m.config.RegisteredUser,
-				Name: &m.config.FrameworkName,
-				Id:   &m.frameworkId,
-			},
-			Type: &acknowledgeType,
-			Acknowledge: &mesos_scheduler.Call_Acknowledge{
-				SlaveId: event.Update.Status.SlaveId,
-				TaskId:  event.Update.Status.TaskId,
-				Uuid:    event.Update.Uuid,
-			},
-		}
-
-		err := m.send(acknowledgeCall)
-		if err != nil {
-			return fmt.Errorf("failed to send acknowledgement: %+v", err)
-		}
-
 		switch *event.Update.Status.State {
-		case mesos.TaskState_TASK_STAGING:
-		case mesos.TaskState_TASK_STARTING:
-		case mesos.TaskState_TASK_RUNNING:
-			log.Printf("task %s is running: %s", event.Update.Status.TaskId.GetValue(), event.Update.Status.GetMessage())
-		case mesos.TaskState_TASK_FINISHED:
-			log.Printf("task %s is complete: %s", event.Update.Status.TaskId.GetValue(), event.Update.Status.GetMessage())
-		case mesos.TaskState_TASK_FAILED:
-			log.Printf("task %s failed: %s", event.Update.Status.TaskId.GetValue(), event.Update.Status.GetMessage())
-		case mesos.TaskState_TASK_KILLED:
-		case mesos.TaskState_TASK_LOST:
-			log.Printf("task %s failed to complete: %s", event.Update.Status.TaskId.GetValue(), event.Update.Status.GetMessage())
+		case mesos.TaskState_TASK_STAGING,
+			mesos.TaskState_TASK_STARTING,
+			mesos.TaskState_TASK_RUNNING,
+			mesos.TaskState_TASK_FINISHED,
+			mesos.TaskState_TASK_FAILED,
+			mesos.TaskState_TASK_KILLED,
+			mesos.TaskState_TASK_LOST:
+
+			m.Updates <- &TaskStateUpdate{
+				TaskId:  event.Update.Status.GetTaskId().GetValue(),
+				SlaveId: event.Update.Status.GetSlaveId().GetValue(),
+				State:   event.Update.Status.GetState(),
+				Uuid:    event.Update.GetUuid(),
+				master:  m,
+			}
+		default:
+			log.Print("Unknown Event_UPDATE: ", event)
 		}
-		// TODO(weingart): Framework (gozer) should be informed here
 
 	case mesos_scheduler.Event_MESSAGE:
 		log.Print("Event MESSAGE: ", event)

@@ -27,7 +27,8 @@ type MesosMaster struct {
 	// TODO(weingart): move to internal type to handle master disconnect, error events/etc.
 	events chan *mesos_scheduler.Event
 
-	Offers chan *mesos.Offer
+	Offers  chan *mesos.Offer
+	Updates chan *TaskStateUpdate
 }
 
 type MesosTask struct {

@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/twitter/gozer/mesos"
@@ -58,81 +57,6 @@ type Task struct {
 	State     TaskState        `json:"-"`
 	MesosTask *mesos.MesosTask `json:"-"`
 	// TODO(dhamon): resource requirements
-}
-
-type TaskStore struct {
-	sync.RWMutex
-	Tasks map[string]*Task
-}
-
-func (t *TaskStore) AddTask(task *Task) error {
-	t.Lock()
-	defer t.Unlock()
-
-	if _, ok := t.Tasks[task.Id]; ok {
-		return fmt.Errorf("Task Id '%s' already exists, addition ignored", task.Id)
-	}
-
-	task.State = TaskState_INIT
-	task.MesosTask = &mesos.MesosTask{
-		Id:      task.Id,
-		Command: task.Command,
-	}
-	t.Tasks[task.Id] = task
-	log.Print("TASK '%s' State * -> %s", task.Id, task.State)
-
-	return nil
-}
-
-func (t *TaskStore) UpdateTask(taskId string, state TaskState) error {
-	t.Lock()
-	defer t.Unlock()
-
-	task, ok := t.Tasks[taskId]
-	if !ok {
-		return fmt.Errorf("Task Id '%s' not found, update ignored", taskId)
-	}
-
-	log.Printf("Task '%s' State %s -> %s", taskId, task.State, state)
-	task.State = state
-
-	return nil
-}
-
-func (t *TaskStore) TaskIds() []string {
-	t.RLock()
-	defer t.RUnlock()
-
-	keys := make([]string, 0)
-	for key := range t.Tasks {
-		keys = append(keys, key)
-	}
-
-	return keys
-}
-
-func (t *TaskStore) TaskState(taskId string) (TaskState, error) {
-	t.RLock()
-	defer t.RUnlock()
-
-	task, ok := t.Tasks[taskId]
-	if !ok {
-		return TaskState_UNKNOWN, fmt.Errorf("Task Id '%s' not found", taskId)
-	}
-
-	return task.State, nil
-}
-
-func (t *TaskStore) MesosTask(taskId string) (*mesos.MesosTask, error) {
-	t.RLock()
-	defer t.RUnlock()
-
-	task, ok := t.Tasks[taskId]
-	if !ok {
-		return nil, fmt.Errorf("Task Id '%s' not found", taskId)
-	}
-
-	return task.MesosTask, nil
 }
 
 func startAPI() {
@@ -197,18 +121,6 @@ func main() {
 	// Start Framework engine
 	go master.Run()
 
-	// Launch simple /bin/true after a little while
-	go func() {
-		time.Sleep(10 * time.Second)
-
-		trueTask := &Task{
-			Id:      "gozer-bin-true",
-			Command: "/bin/true",
-		}
-
-		taskstore.AddTask(trueTask)
-	}()
-
 	// Shephard all our tasks
 	//
 	// Note: This will require a significant re-architecting, most likely to break out the
@@ -230,7 +142,10 @@ func main() {
 
 		select {
 		// case <-master.Events:
-		// case <-master.Updates:
+
+		case update := <-master.Updates:
+			log.Println("Gozer:", update)
+			update.Ack()
 
 		case <-time.After(5 * time.Second):
 			log.Print("Gozer: timeout, check tasks")

@@ -25,6 +25,7 @@ func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
 		command:   make(chan func(*MesosMaster) error),
 		events:    make(chan *mesos_scheduler.Event, 100),
 		Offers:    make(chan *mesos.Offer, 100),
+		Updates:   make(chan *TaskStateUpdate),
 		localIp:   addrs[0],
 		localPort: 8888, // TODO(weingart): use ephemeral port
 	}
