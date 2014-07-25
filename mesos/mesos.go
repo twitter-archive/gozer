@@ -45,5 +45,10 @@ func New(framework string, user string, master string, port int) (d *Driver, err
 		},
 	}
 
-	return NewDriver(cf)
+	d, err = NewDriver(cf)
+	if err == nil {
+		go d.Run()
+	}
+
+	return
 }

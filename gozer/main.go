@@ -97,21 +97,9 @@ func main() {
 
 	log.Printf("Registering...")
 	master, err := mesos.New("gozer", *user, *master, *masterPort)
-
-	// &mesos.DriverConfig{
-	// 	FrameworkName:  "gozer",
-	// 	RegisteredUser: *user,
-	// 	Masters: []mesos.MesosMasterAddress{mesos.MesosMasterAddress{
-	// 		Hostname: *master,
-	// 		Port:     *masterPort,
-	// 	}},
-	// })
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Start Framework engine
-	go master.Run()
 
 	// Shephard all our tasks
 	//
