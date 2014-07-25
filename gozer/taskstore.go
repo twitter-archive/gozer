@@ -22,7 +22,7 @@ func (t *TaskStore) AddTask(task *Task) error {
 	}
 
 	task.State = TaskState_INIT
-	task.MesosTask = &mesos.MesosTask{
+	task.mesosTask = &mesos.MesosTask{
 		Id:      task.Id,
 		Command: task.Command,
 	}
@@ -80,5 +80,5 @@ func (t *TaskStore) MesosTask(taskId string) (*mesos.MesosTask, error) {
 		return nil, fmt.Errorf("task Id '%s' not found", taskId)
 	}
 
-	return task.MesosTask, nil
+	return task.mesosTask, nil
 }

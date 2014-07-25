@@ -54,7 +54,7 @@ type Task struct {
 	Id        string           `json:"id"`
 	Command   string           `json:"command"`
 	State     TaskState        `json:"-"`
-	MesosTask *mesos.MesosTask `json:"-"`
+	mesosTask *mesos.MesosTask `json:"-"`
 	// TODO(dhamon): resource requirements
 }
 
