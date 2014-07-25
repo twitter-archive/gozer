@@ -7,21 +7,21 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func stateRegister(m *MesosMaster) stateFn {
-	log.Print("REGISTERING: Trying to register framework:", m)
+func stateRegister(d *Driver) stateFn {
+	log.Print("REGISTERING: Trying to register framework:", d)
 
 	// Create the register message and send it.
 	callType := mesos_scheduler.Call_REGISTER
 	registerCall := &mesos_scheduler.Call{
 		Type: &callType,
 		FrameworkInfo: &mesos.FrameworkInfo{
-			User: &m.config.RegisteredUser,
-			Name: &m.config.FrameworkName,
+			User: &d.config.RegisteredUser,
+			Name: &d.config.FrameworkName,
 		},
 	}
 
 	// TODO(weingart): This should re-try and backoff
-	err := m.send(registerCall)
+	err := d.send(registerCall)
 	if err != nil {
 		log.Print("Error: send: ", err)
 		return stateError
@@ -29,14 +29,14 @@ func stateRegister(m *MesosMaster) stateFn {
 
 	// Wait for Registered event, throw away any other events
 	for {
-		event := <-m.events
+		event := <-d.events
 		if *event.Type != mesos_scheduler.Event_REGISTERED {
 			log.Printf("Unexpected event type: want %q, got %+v", mesos_scheduler.Event_REGISTERED, *event.Type)
 		}
-		m.frameworkId = *event.Registered.FrameworkId
+		d.frameworkId = *event.Registered.FrameworkId
 		break
 	}
 
-	log.Printf("Registered %s:%s with id %q", m.config.RegisteredUser, m.config.FrameworkName, *m.frameworkId.Value)
+	log.Printf("Registered %s:%s with id %q", d.config.RegisteredUser, d.config.FrameworkName, *d.frameworkId.Value)
 	return stateReady
 }

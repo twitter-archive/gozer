@@ -14,8 +14,8 @@ const (
 	//...
 )
 
-func stateError(m *MesosMaster) stateFn {
+func stateError(d *Driver) stateFn {
 	// Handle any type of error state
-	log.Print("STATE: Error, MesosMaster = ", m)
+	log.Print("STATE: Error, MesosMaster = ", d)
 	return stateStop
 }

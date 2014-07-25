@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func stateReady(m *MesosMaster) stateFn {
+func stateReady(d *Driver) stateFn {
 	// Framework is connected, ready and waiting for something to do
 	log.Print("STATE: Ready")
 
@@ -13,8 +13,8 @@ func stateReady(m *MesosMaster) stateFn {
 	case <-time.Tick(time.Minute):
 		return stateHeartbeat
 
-	case command := <-m.command:
-		stateSendCommand := func(fm *MesosMaster) stateFn {
+	case command := <-d.command:
+		stateSendCommand := func(fm *Driver) stateFn {
 			if err := command(fm); err != nil {
 				log.Print("Error: ", err)
 				return stateError
@@ -23,8 +23,8 @@ func stateReady(m *MesosMaster) stateFn {
 		}
 		return stateSendCommand
 
-	case event := <-m.events:
-		stateReceiveEvent := func(fm *MesosMaster) stateFn {
+	case event := <-d.events:
+		stateReceiveEvent := func(fm *Driver) stateFn {
 			if err := fm.eventDispatch(event); err != nil {
 				log.Print("Error: ", err)
 				return stateError

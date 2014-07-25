@@ -97,11 +97,11 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 	return nil, fmt.Errorf("unimplemented call type %q", *m.Type)
 }
 
-func (m *MesosMaster) send(ms *mesos_scheduler.Call) error {
+func (d *Driver) send(m *mesos_scheduler.Call) error {
 	// TODO(dhamon): Remove this call when mesos listens for Call directly.
-	msg, err := callToMessage(ms)
+	msg, err := callToMessage(m)
 	if err != nil {
-		return fmt.Errorf("failed to convert Call %+v: %+v", ms, err)
+		return fmt.Errorf("failed to convert Call %+v: %+v", m, err)
 	}
 
 	buffer, err := proto.Marshal(msg)
@@ -109,19 +109,19 @@ func (m *MesosMaster) send(ms *mesos_scheduler.Call) error {
 		return fmt.Errorf("failed to marshal Message %+v: %+v", msg, err)
 	}
 
-	path, err := path(ms)
+	path, err := path(m)
 	if err != nil {
-		return fmt.Errorf("failed to get path for Call %+v: %+v", ms, err)
+		return fmt.Errorf("failed to get path for Call %+v: %+v", m, err)
 	}
 
-	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", m.config.Masters[0].Hostname, m.config.Masters[0].Port) + "/" + path
+	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", d.config.Masters[0].Hostname, d.config.Masters[0].Port) + "/" + path
 	log.Printf("sending %+v to %s", msg, registerUrl)
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-type", "application/octet-stream")
-	req.Header.Add("Libprocess-From", fmt.Sprintf("%s@%s:%d", m.config.FrameworkName, m.localIp, m.localPort))
+	req.Header.Add("Libprocess-From", fmt.Sprintf("%s@%s:%d", d.config.FrameworkName, d.localIp, d.localPort))
 
 	resp, err := client.Do(req)
 	if err != nil {

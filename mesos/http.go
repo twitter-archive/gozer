@@ -8,22 +8,22 @@ import (
 	"strings"
 )
 
-func startServing(m *MesosMaster) {
+func startServing(d *Driver) {
 
 	// TODO(weingart): Grab an emphemeral port for this instead and toss it into MesosMaster
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(rw http.ResponseWriter, req *http.Request) {
 		fmt.Fprint(rw, "OK\r\n")
 	})
-	mux.Handle("/", m)
+	mux.Handle("/", d)
 
-	log.Printf("listening on port %d", m.localPort)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", m.localPort), mux); err != nil {
-		log.Fatalf("failed to start listening on port %d", m.localPort)
+	log.Printf("listening on port %d", d.localPort)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", d.localPort), mux); err != nil {
+		log.Fatalf("failed to start listening on port %d", d.localPort)
 	}
 }
 
-func (m *MesosMaster) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -33,10 +33,10 @@ func (m *MesosMaster) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	pathElements := strings.Split(r.URL.Path, "/")
 
-	if pathElements[1] != m.config.FrameworkName {
+	if pathElements[1] != d.config.FrameworkName {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", m.config.FrameworkName, pathElements[1])))
-		log.Printf("received request with unexpected path. want %q, got %q: %+v", m.config.FrameworkName, pathElements[1], r)
+		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", d.config.FrameworkName, pathElements[1])))
+		log.Printf("received request with unexpected path. want %q, got %q: %+v", d.config.FrameworkName, pathElements[1], r)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (m *MesosMaster) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m.events <- event
+	d.events <- event
 
 	w.WriteHeader(http.StatusOK)
 }

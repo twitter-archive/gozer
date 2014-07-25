@@ -8,7 +8,7 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
+func New(mc *MesosMasterConfig) (d *Driver, err error) {
 
 	name, err := os.Hostname()
 	if err != nil {
@@ -20,9 +20,9 @@ func New(mc *MesosMasterConfig) (m *MesosMaster, err error) {
 		return
 	}
 
-	m = &MesosMaster{
+	d = &Driver{
 		config:    *mc,
-		command:   make(chan func(*MesosMaster) error),
+		command:   make(chan func(*Driver) error),
 		events:    make(chan *mesos_scheduler.Event, 100),
 		Offers:    make(chan *mesos.Offer, 100),
 		Updates:   make(chan *TaskStateUpdate),

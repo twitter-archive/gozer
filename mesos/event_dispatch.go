@@ -8,7 +8,7 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func (m *MesosMaster) eventDispatch(event *mesos_scheduler.Event) error {
+func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 
 	switch *event.Type {
 	case mesos_scheduler.Event_REGISTERED:
@@ -19,14 +19,14 @@ func (m *MesosMaster) eventDispatch(event *mesos_scheduler.Event) error {
 
 	case mesos_scheduler.Event_OFFERS:
 		for _, offer := range event.Offers.Offers {
-			if *offer.FrameworkId.Value != *m.frameworkId.Value {
+			if *offer.FrameworkId.Value != *d.frameworkId.Value {
 				log.Print("Unexpected framework in offer: want %q, got %q",
-					*m.frameworkId.Value, *offer.FrameworkId.Value)
+					*d.frameworkId.Value, *offer.FrameworkId.Value)
 				continue
 			}
 
-			if len(m.Offers) < cap(m.Offers) {
-				m.Offers <- offer
+			if len(d.Offers) < cap(d.Offers) {
+				d.Offers <- offer
 			} else {
 				// TODO(weingart): how to ignore/return offer?
 			}
@@ -47,12 +47,12 @@ func (m *MesosMaster) eventDispatch(event *mesos_scheduler.Event) error {
 			mesos.TaskState_TASK_KILLED,
 			mesos.TaskState_TASK_LOST:
 
-			m.Updates <- &TaskStateUpdate{
+			d.Updates <- &TaskStateUpdate{
 				TaskId:  event.Update.Status.GetTaskId().GetValue(),
 				SlaveId: event.Update.Status.GetSlaveId().GetValue(),
 				State:   event.Update.Status.GetState(),
 				Uuid:    event.Update.GetUuid(),
-				master:  m,
+				driver:  d,
 			}
 		default:
 			log.Print("Unknown Event_UPDATE: ", event)

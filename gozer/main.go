@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -72,19 +71,10 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		log.Printf("received addtask request with unexpected method. want %q, got %q: %+v", "POST", r.Method, r)
 	}
-
 	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("ERROR: failed to read body from addtask request %+v: %+v", r, err)
-		// TODO(dhamon): Better error for this case.
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
 	var task Task
-	err = json.Unmarshal(body, &task)
-
+	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Printf("ERROR: failed to parse JSON body from addtask request %+v: %+v", r, err)
 		// TODO(dhamon): Better error for this case.

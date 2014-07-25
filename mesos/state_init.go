@@ -8,14 +8,14 @@ import (
 )
 
 // We wait until HTTP Pid endpoint is ready and healthy
-func stateInit(m *MesosMaster) stateFn {
-	log.Print("INIT: Starting framework:", m)
+func stateInit(d *Driver) stateFn {
+	log.Print("INIT: Starting framework:", d)
 
 	delay := time.Second
-	healthURL := fmt.Sprintf("http://%s:%d/health", m.localIp, m.localPort)
+	healthURL := fmt.Sprintf("http://%s:%d/health", d.localIp, d.localPort)
 
 	// Start Pid endpoint
-	go startServing(m)
+	go startServing(d)
 
 	// Now wait for healthy endpoint
 	for {

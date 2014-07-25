@@ -5,9 +5,9 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func (m *MesosMaster) LaunchTask(offer *mesos.Offer, task *MesosTask) error {
+func (d *Driver) LaunchTask(offer *mesos.Offer, task *MesosTask) error {
 
-	m.command <- func(fm *MesosMaster) error {
+	d.command <- func(fm *Driver) error {
 
 		launchType := mesos_scheduler.Call_LAUNCH
 		launchCall := &mesos_scheduler.Call{
