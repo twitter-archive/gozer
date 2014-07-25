@@ -3,7 +3,6 @@ package mesos
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 
 	"code.google.com/p/goprotobuf/proto"
@@ -38,7 +37,6 @@ func path(m *mesos_scheduler.Call) (string, error) {
 }
 
 func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
-	log.Printf("converting from %+v", m)
 	switch *m.Type {
 	case mesos_scheduler.Call_REGISTER:
 		return &mesos_internal.RegisterFrameworkMessage{
@@ -115,7 +113,6 @@ func (d *Driver) send(m *mesos_scheduler.Call) error {
 	}
 
 	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", d.config.Masters[0].Hostname, d.config.Masters[0].Port) + "/" + path
-	log.Printf("sending %+v to %s", msg, registerUrl)
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))

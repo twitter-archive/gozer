@@ -5,19 +5,19 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-type MesosMasterLocation struct {
+type MasterAddress struct {
 	Hostname string
 	Port     int
 }
 
-type MesosMasterConfig struct {
+type DriverConfig struct {
 	FrameworkName  string
 	RegisteredUser string
-	Masters        []MesosMasterLocation
+	Masters        []MasterAddress
 }
 
 type Driver struct {
-	config    MesosMasterConfig
+	config    DriverConfig
 	localIp   string
 	localPort int
 

@@ -69,7 +69,7 @@ func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 
 	default:
 		log.Print("Unexpected Event: ", event)
-		return fmt.Errorf("Unexpected Event type: %q", event.Type)
+		return fmt.Errorf("unexpected event type: %q", event.Type)
 	}
 
 	return nil

@@ -96,14 +96,16 @@ func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
 	log.Printf("Registering...")
-	master, err := mesos.New(&mesos.MesosMasterConfig{
-		FrameworkName:  "gozer",
-		RegisteredUser: *user,
-		Masters: []mesos.MesosMasterLocation{mesos.MesosMasterLocation{
-			Hostname: *master,
-			Port:     *masterPort,
-		}},
-	})
+	master, err := mesos.New("gozer", *user, *master, *masterPort)
+
+	// &mesos.DriverConfig{
+	// 	FrameworkName:  "gozer",
+	// 	RegisteredUser: *user,
+	// 	Masters: []mesos.MesosMasterAddress{mesos.MesosMasterAddress{
+	// 		Hostname: *master,
+	// 		Port:     *masterPort,
+	// 	}},
+	// })
 	if err != nil {
 		log.Fatal(err)
 	}

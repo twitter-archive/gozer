@@ -1,6 +1,7 @@
 package mesos
 
 import (
+	"log"
 	"net"
 	"os"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func New(mc *MesosMasterConfig) (d *Driver, err error) {
+func NewDriver(mc *DriverConfig) (d *Driver, err error) {
 
 	name, err := os.Hostname()
 	if err != nil {
@@ -19,6 +20,7 @@ func New(mc *MesosMasterConfig) (d *Driver, err error) {
 	if err != nil {
 		return
 	}
+	log.Printf("XXX: %s = %+v", name, addrs)
 
 	d = &Driver{
 		config:    *mc,
@@ -31,4 +33,17 @@ func New(mc *MesosMasterConfig) (d *Driver, err error) {
 	}
 
 	return
+}
+
+func New(framework string, user string, master string, port int) (d *Driver, err error) {
+
+	cf := &DriverConfig{
+		FrameworkName:  framework,
+		RegisteredUser: user,
+		Masters: []MasterAddress{
+			MasterAddress{Hostname: master, Port: port},
+		},
+	}
+
+	return NewDriver(cf)
 }
