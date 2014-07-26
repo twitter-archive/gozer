@@ -51,7 +51,7 @@ func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 				TaskId:  event.Update.Status.GetTaskId().GetValue(),
 				SlaveId: event.Update.Status.GetSlaveId().GetValue(),
 				State:   event.Update.Status.GetState(),
-				Uuid:    event.Update.GetUuid(),
+				uuid:    event.Update.GetUuid(),
 				driver:  d,
 			}
 		default:

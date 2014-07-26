@@ -12,13 +12,13 @@ type TaskStateUpdate struct {
 	TaskId  string
 	SlaveId string
 	State   mesos.TaskState
-	Uuid    uuid.UUID
+	uuid    uuid.UUID
 	driver  *Driver
 }
 
 func (u *TaskStateUpdate) String() string {
 	return fmt.Sprintf("update %s, task '%s' on slave '%s', state = %s",
-		u.Uuid.String(),
+		u.uuid.String(),
 		u.TaskId,
 		u.SlaveId,
 		u.State.String())
@@ -43,7 +43,7 @@ func (u *TaskStateUpdate) Ack() {
 				TaskId: &mesos.TaskID{
 					Value: &u.TaskId,
 				},
-				Uuid: u.Uuid,
+				Uuid: u.uuid,
 			},
 		}
 
