@@ -17,9 +17,9 @@ type DriverConfig struct {
 }
 
 type Driver struct {
-	config    DriverConfig
-	pidIp     string
-	pidPort   int
+	config  DriverConfig
+	pidIp   string
+	pidPort int
 
 	frameworkId mesos.FrameworkID
 
