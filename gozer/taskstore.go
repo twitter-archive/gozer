@@ -24,7 +24,7 @@ func (t *TaskStore) Add(task *Task) error {
 	defer t.Unlock()
 
 	if _, ok := t.tasks[task.Id]; ok {
-		return fmt.Errorf("task Id '%s' already exists, addition ignored", task.Id)
+		return fmt.Errorf("task Id %q already exists; addition ignored", task.Id)
 	}
 
 	task.State = TaskState_INIT
@@ -33,7 +33,21 @@ func (t *TaskStore) Add(task *Task) error {
 		Command: task.Command,
 	}
 	t.tasks[task.Id] = task
-	log.Printf("TASK '%s' State * -> %s", task.Id, task.State)
+	log.Printf("TASK %q State * -> %s", task.Id, task.State)
+
+	return nil
+}
+
+func (t *TaskStore) Remove(taskId string) error {
+	t.Lock()
+	defer t.Unlock()
+
+	if _, ok := t.tasks[taskId]; !ok {
+		return fmt.Errorf("task Id %q not found; removal ignored", taskId)
+	}
+
+	delete(t.tasks, taskId)
+	log.Printf("TASK %q removed", taskId)
 
 	return nil
 }
@@ -44,10 +58,10 @@ func (t *TaskStore) Update(taskId string, state TaskState) error {
 
 	task, ok := t.tasks[taskId]
 	if !ok {
-		return fmt.Errorf("task Id '%s' not found, update ignored", taskId)
+		return fmt.Errorf("task Id %q not found, update ignored", taskId)
 	}
 
-	log.Printf("TASK '%s' State %s -> %s", taskId, task.State, state)
+	log.Printf("TASK %q State %s -> %s", taskId, task.State, state)
 	task.State = state
 
 	return nil
@@ -71,7 +85,7 @@ func (t *TaskStore) State(taskId string) (TaskState, error) {
 
 	task, ok := t.tasks[taskId]
 	if !ok {
-		return TaskState_UNKNOWN, fmt.Errorf("task Id '%s' not found", taskId)
+		return "", fmt.Errorf("task Id %q not found", taskId)
 	}
 
 	return task.State, nil
@@ -83,7 +97,7 @@ func (t *TaskStore) MesosTask(taskId string) (*mesos.MesosTask, error) {
 
 	task, ok := t.tasks[taskId]
 	if !ok {
-		return nil, fmt.Errorf("task Id '%s' not found", taskId)
+		return nil, fmt.Errorf("task Id %q not found", taskId)
 	}
 
 	return task.mesosTask, nil
