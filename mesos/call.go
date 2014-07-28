@@ -3,7 +3,6 @@ package mesos
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 
 	"code.google.com/p/goprotobuf/proto"
@@ -15,14 +14,17 @@ import (
 
 var (
 	callTypeMap = map[mesos_scheduler.Call_Type]string{
-		mesos_scheduler.Call_REGISTER:    "mesos.internal.RegisterFrameworkMessage",
-		mesos_scheduler.Call_REREGISTER:  "mesos.internal.ReregisterFrameworkMessage",
-		mesos_scheduler.Call_UNREGISTER:  "mesos.internal.UnregisterFrameworkMessage",
-		mesos_scheduler.Call_REQUEST:     "mesos.internal.ResourceRequestMessage",
+		mesos_scheduler.Call_REGISTER:   "mesos.internal.RegisterFrameworkMessage",
+		mesos_scheduler.Call_REREGISTER: "mesos.internal.ReregisterFrameworkMessage",
+		mesos_scheduler.Call_UNREGISTER: "mesos.internal.UnregisterFrameworkMessage",
+		mesos_scheduler.Call_REQUEST:    "mesos.internal.ResourceRequestMessage",
+		// mesos_scheduler.Call_DECLINE
+		// mesos_scheduler.Call_REVIVE
 		mesos_scheduler.Call_LAUNCH:      "mesos.internal.LaunchTasksMessage",
 		mesos_scheduler.Call_KILL:        "mesos.internal.KillTaskMessage",
 		mesos_scheduler.Call_ACKNOWLEDGE: "mesos.internal.StatusUpdateAcknowledgementMessage",
 		mesos_scheduler.Call_RECONCILE:   "mesos.internal.ReconcileTasksMessage",
+		// mesos_scheduler.Call_MESSAGE
 	}
 )
 
@@ -35,7 +37,6 @@ func path(m *mesos_scheduler.Call) (string, error) {
 }
 
 func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
-	log.Printf("converting from %+v", m)
 	switch *m.Type {
 	case mesos_scheduler.Call_REGISTER:
 		return &mesos_internal.RegisterFrameworkMessage{
@@ -94,7 +95,7 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 	return nil, fmt.Errorf("unimplemented call type %q", *m.Type)
 }
 
-func send(m *mesos_scheduler.Call) error {
+func (d *Driver) send(m *mesos_scheduler.Call) error {
 	// TODO(dhamon): Remove this call when mesos listens for Call directly.
 	msg, err := callToMessage(m)
 	if err != nil {
@@ -111,14 +112,13 @@ func send(m *mesos_scheduler.Call) error {
 		return fmt.Errorf("failed to get path for Call %+v: %+v", m, err)
 	}
 
-	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", *master, *masterPort) + "/" + path
-	log.Printf("sending %+v to %s", msg, registerUrl)
+	registerUrl := "http://" + fmt.Sprintf("%s:%d/master", d.config.Masters[0].Hostname, d.config.Masters[0].Port) + "/" + path
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-type", "application/octet-stream")
-	req.Header.Add("Libprocess-From", fmt.Sprintf("gozer@%s:%d", ip, port))
+	req.Header.Add("Libprocess-From", fmt.Sprintf("%s@%s:%d", d.config.FrameworkName, d.pidIp, d.pidPort))
 
 	resp, err := client.Do(req)
 	if err != nil {

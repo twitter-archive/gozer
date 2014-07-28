@@ -8,29 +8,22 @@ import (
 	"strings"
 )
 
-const (
-	port = 8888
-)
+func startServing(d *Driver) {
 
-var (
-//	port       = flag.Int("port", 4242, "Port to listen on for HTTP endpoint")
-)
+	// TODO(weingart): Grab an ephemeral port for this instead and toss it into MesosMaster
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", func(rw http.ResponseWriter, req *http.Request) {
+		fmt.Fprint(rw, "OK\r\n")
+	})
+	mux.Handle("/", d)
 
-func init() {
-	http.HandleFunc("/", rootHandler)
-	httpWaitGroup.Add(1)
-	go startServing()
-}
-
-func startServing() {
-	log.Printf("listening on port %d", port)
-	httpWaitGroup.Done()
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
-		log.Fatalf("failed to start listening on port %d", port)
+	log.Printf("Listening on port %d", d.pidPort)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", d.pidPort), mux); err != nil {
+		log.Fatalf("failed to start listening on port %d", d.pidPort)
 	}
 }
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
+func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -40,10 +33,10 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	pathElements := strings.Split(r.URL.Path, "/")
 
-	if pathElements[1] != frameworkName {
+	if pathElements[1] != d.config.FrameworkName {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", frameworkName, pathElements[1])))
-		log.Printf("received request with unexpected path. want %q, got %q: %+v", frameworkName, pathElements[1], r)
+		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", d.config.FrameworkName, pathElements[1])))
+		log.Printf("received request with unexpected path. want %q, got %q: %+v", d.config.FrameworkName, pathElements[1], r)
 		return
 	}
 
@@ -62,7 +55,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	events <- event
+	d.events <- event
 
 	w.WriteHeader(http.StatusOK)
 }

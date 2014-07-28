@@ -4,30 +4,62 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/twitter/gozer/mesos"
 )
 
-const (
-	frameworkName = "gozer"
-)
-
 var (
-	user = flag.String("user", "", "The user to register as")
-	port = flag.Int("port", 4343, "Port to listen on for HTTP endpoint")
+	user       = flag.String("user", "", "The user to register as")
+	port       = flag.Int("port", 4343, "Port to listen on for the API endpoint")
+	master     = flag.String("master", "localhost", "Hostname of the master")
+	masterPort = flag.Int("masterPort", 5050, "Port of the master")
 
-	tasks = make(chan Task)
+	taskstore = NewTaskStore()
+
+	// TODO(dhamon): add custom logger
 )
+
+type TaskState int
+
+const (
+	TaskState_UNKNOWN TaskState = iota
+	TaskState_INIT
+	TaskState_STARTING
+	TaskState_RUNNING
+	TaskState_FAILED
+	TaskState_FINISHED
+)
+
+func (t TaskState) String() string {
+	switch t {
+	case TaskState_INIT:
+		return "INIT"
+	case TaskState_STARTING:
+		return "STARTING"
+	case TaskState_RUNNING:
+		return "RUNNING"
+	case TaskState_FAILED:
+		return "FAILED"
+	case TaskState_FINISHED:
+		return "FINISHED"
+	default:
+		return "UNKNOWN"
+	}
+}
 
 type Task struct {
-	Command string
+	Id        string           `json:"id"`
+	Command   string           `json:"command"`
+	State     TaskState        `json:"state"`
+	mesosTask *mesos.MesosTask `json:"-"`
 	// TODO(dhamon): resource requirements
 }
 
 func startAPI() {
+	http.HandleFunc("/api/addtask", addTaskHandler)
 	log.Printf("api listening on port %d", *port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
 		log.Fatalf("failed to start listening on port %d", *port)
@@ -40,19 +72,10 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		log.Printf("received addtask request with unexpected method. want %q, got %q: %+v", "POST", r.Method, r)
 	}
-
 	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("ERROR: failed to read body from addtask request %+v: %+v", r, err)
-		// TODO(dhamon): Better error for this case.
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 
 	var task Task
-	err = json.Unmarshal(body, &task)
-
+	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Printf("ERROR: failed to parse JSON body from addtask request %+v: %+v", r, err)
 		// TODO(dhamon): Better error for this case.
@@ -60,7 +83,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks <- task
+	taskstore.Add(&task)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -68,41 +91,74 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
-	http.HandleFunc("/api/addtask", addTaskHandler)
 	go startAPI()
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	log.Printf("Registering...")
-	err := mesos.Register(*user, frameworkName)
+	log.Println("Registering...")
+	driver, err := mesos.New("gozer", *user, *master, *masterPort)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO(dhamon): add event loop to respond to tasks by launching if offers available.
-
-	taskId := 0
+	// Shephard all our tasks
+	//
+	// Note: This will require a significant re-architecting, most likely to break out the
+	// gozer based tasks and their state transitions, possibly using a go-routine per task,
+	// which may limit the total number of tasks we can handle (100k go-routines might be
+	// too much).  It should make for a simple abstraction, where the update routine should
+	// then be able to simply use a channel to post a state transition to the gozer task,
+	// which the gozer task manager (per task) go routine would then use to transition the
+	// task through its state diagram.  This should also make it very simple to detect bad
+	// transitions.
+	//
+	// It would be nice if we could just only use the mesos.TaskState_TASK_* states, however,
+	// they do not encompass the ideas of PENDING (waiting for offers), and ASSIGNED (offer
+	// selected, waiting for running), nor do they encompass tear-down and death.
+	//
+	// For now we use a simple loop to do a very naive management of tasks, updates, events,
+	// errors, etc.
 	for {
-		// TODO(dhamon): wait for offers in go routine
-		log.Printf("Waiting for offers...")
-		offers, err := mesos.WaitForOffers()
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		// TODO(dhamon): add offers to list and consume as tasks come in.
-		for _, offer := range offers {
-			log.Printf("Received offer %+v", offer)
-			log.Printf("Waiting for tasks...")
-			task := <-tasks
+		select {
 
-			// TODO(dhamon): Decline offers if resources don't match.
-			err = mesos.LaunchTask(offer, fmt.Sprintf("gozer-task-%d", taskId), task.Command)
-			taskId += 1
-			if err != nil {
-				log.Fatal(err)
+		case update := <-driver.Updates:
+			log.Println("Gozer status update:", update)
+			update.Ack()
+
+		case <-time.After(5 * time.Second):
+			log.Println("Gozer: checking for tasks")
+			// After a timeout, see if there any tasks to launch
+			taskIds := taskstore.Ids()
+			for _, taskId := range taskIds {
+				state, err := taskstore.State(taskId)
+				if err != nil {
+					log.Printf("Gozer: error getting task state for task %q: %+v", taskId, err)
+					continue
+				}
+
+				if state != TaskState_INIT {
+					continue
+				}
+
+				mesosTask, err := taskstore.MesosTask(taskId)
+				if err != nil {
+					log.Printf("Gozer: error getting mesos task for task %q: %+v", taskId, err)
+					continue
+				}
+
+				// Start this task (very naive method)
+				offer := <-driver.Offers
+
+				// TODO(dhamon): Check for resources before launching
+				err = driver.LaunchTask(offer, mesosTask)
+				if err != nil {
+					log.Printf("Gozer: error launching task %q: %+v", taskId, err)
+					continue
+				}
+
+				taskstore.Update(taskId, TaskState_STARTING)
 			}
-
 		}
 	}
 }

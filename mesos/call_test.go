@@ -17,4 +17,3 @@ func TestPath(t *testing.T) {
 		t.Errorf("path(%v): got %v, want %v", in, got, out)
 	}
 }
-
