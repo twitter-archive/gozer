@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 	"time"
 
 	"github.com/twitter/gozer/mesos"
+	mesos_pb "github.com/twitter/gozer/proto/mesos.pb"
 )
 
 var (
@@ -28,32 +28,27 @@ var (
 	)
 )
 
-type TaskState int
+
+type TaskState string
 
 const (
-	TaskState_UNKNOWN TaskState = iota
-	TaskState_INIT
-	TaskState_STARTING
-	TaskState_RUNNING
-	TaskState_FAILED
-	TaskState_FINISHED
+	TaskState_INIT TaskState = "INIT"
+	TaskState_STARTING TaskState = "STARTING"
+	TaskState_RUNNING TaskState = "RUNNING"
+	TaskState_FINISHED TaskState = "FINISHED"
+	TaskState_FAILED TaskState = "FAILED"
+	TaskState_KILLED TaskState = "KILLED"
+	TaskState_LOST TaskState = "LOST"
 )
 
-func (t TaskState) String() string {
-	switch t {
-	case TaskState_INIT:
-		return "INIT"
-	case TaskState_STARTING:
-		return "STARTING"
-	case TaskState_RUNNING:
-		return "RUNNING"
-	case TaskState_FAILED:
-		return "FAILED"
-	case TaskState_FINISHED:
-		return "FINISHED"
-	default:
-		return "UNKNOWN"
-	}
+var taskStateMap = map[mesos_pb.TaskState]TaskState{
+	mesos_pb.TaskState_TASK_STAGING: TaskState_STARTING,
+	mesos_pb.TaskState_TASK_STARTING: TaskState_STARTING,
+	mesos_pb.TaskState_TASK_RUNNING: TaskState_RUNNING,
+	mesos_pb.TaskState_TASK_FINISHED: TaskState_FINISHED,
+	mesos_pb.TaskState_TASK_FAILED: TaskState_FAILED,
+	mesos_pb.TaskState_TASK_KILLED: TaskState_KILLED,
+	mesos_pb.TaskState_TASK_LOST: TaskState_LOST,
 }
 
 type Task struct {
@@ -64,40 +59,10 @@ type Task struct {
 	// TODO(dhamon): resource requirements
 }
 
-func startAPI() {
-	http.HandleFunc("/api/addtask", addTaskHandler)
-	log.Info.Println("api listening on port", *port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
-		log.Error.Fatal("failed to start listening on port", *port)
-	}
-}
-
-func addTaskHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.Header().Add("Allow", "POST")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		log.Warn.Printf("received addtask request with unexpected method. want \"POST\", got %q: %+v", r.Method, r)
-	}
-	defer r.Body.Close()
-
-	var task Task
-	err := json.NewDecoder(r.Body).Decode(&task)
-	if err != nil {
-		log.Error.Printf("ERROR: failed to parse JSON body from addtask request %+v: %+v", r, err)
-		// TODO(dhamon): Better error for this case.
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	taskstore.Add(&task)
-
-	w.WriteHeader(http.StatusOK)
-}
-
 func main() {
 	flag.Parse()
 
-	go startAPI()
+	go startHTTP()
 
 	log.Info.Println("Registering")
 	driver, err := mesos.New("gozer", *user, *master, *masterPort)
@@ -105,7 +70,7 @@ func main() {
 		log.Error.Fatal(err)
 	}
 
-	// Shephard all our tasks
+	// Shepherd all our tasks
 	//
 	// Note: This will require a significant re-architecting, most likely to break out the
 	// gozer based tasks and their state transitions, possibly using a go-routine per task,
@@ -128,6 +93,31 @@ func main() {
 
 		case update := <-driver.Updates:
 			log.Info.Println("Status update:", update)
+			state, err := taskstore.State(update.TaskId)
+			if err != nil {
+				log.Error.Printf("Failed to get current state for updated task %q: %+s", update.TaskId, err)
+				continue
+			}
+
+			newState, ok := taskStateMap[update.State]
+			if !ok {
+				log.Error.Printf("Unknown mesos task state: %s", update.State)
+				continue
+			}
+
+			log.Info.Println("Updating task state from", state, "to", newState)
+
+			switch newState {
+			case TaskState_FAILED:
+			case TaskState_FINISHED:
+			case TaskState_KILLED:
+			case TaskState_LOST:
+				taskstore.Remove(update.TaskId)
+
+			default:
+				taskstore.Update(update.TaskId, newState)
+			}
+
 			update.Ack()
 
 		case <-time.After(5 * time.Second):
