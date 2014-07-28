@@ -10,7 +10,6 @@ import (
 )
 
 func newDriver(mc *DriverConfig) (d *Driver, err error) {
-
 	name, err := os.Hostname()
 	if err != nil {
 		return
@@ -36,7 +35,6 @@ func newDriver(mc *DriverConfig) (d *Driver, err error) {
 }
 
 func New(framework, user, master string, port int) (d *Driver, err error) {
-
 	cf := &DriverConfig{
 		FrameworkName:  framework,
 		RegisteredUser: user,
