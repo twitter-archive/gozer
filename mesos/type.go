@@ -18,8 +18,8 @@ type DriverConfig struct {
 
 type Driver struct {
 	config    DriverConfig
-	localIp   string
-	localPort int
+	pidIp     string
+	pidPort   int
 
 	frameworkId mesos.FrameworkID
 

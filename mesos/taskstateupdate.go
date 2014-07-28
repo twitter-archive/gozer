@@ -25,9 +25,7 @@ func (u *TaskStateUpdate) String() string {
 }
 
 func (u *TaskStateUpdate) Ack() {
-
 	u.driver.command <- func(d *Driver) error {
-
 		acknowledgeType := mesos_scheduler.Call_ACKNOWLEDGE
 		acknowledgeCall := &mesos_scheduler.Call{
 			FrameworkInfo: &mesos.FrameworkInfo{

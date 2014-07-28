@@ -10,14 +10,20 @@ import (
 
 type TaskStore struct {
 	sync.RWMutex
-	Tasks map[string]*Task
+	tasks map[string]*Task
 }
 
-func (t *TaskStore) AddTask(task *Task) error {
+func NewTaskStore() *TaskStore {
+	return &TaskStore{
+		tasks: make(map[string]*Task),
+	}
+}
+
+func (t *TaskStore) Add(task *Task) error {
 	t.Lock()
 	defer t.Unlock()
 
-	if _, ok := t.Tasks[task.Id]; ok {
+	if _, ok := t.tasks[task.Id]; ok {
 		return fmt.Errorf("task Id '%s' already exists, addition ignored", task.Id)
 	}
 
@@ -26,17 +32,17 @@ func (t *TaskStore) AddTask(task *Task) error {
 		Id:      task.Id,
 		Command: task.Command,
 	}
-	t.Tasks[task.Id] = task
+	t.tasks[task.Id] = task
 	log.Printf("TASK '%s' State * -> %s", task.Id, task.State)
 
 	return nil
 }
 
-func (t *TaskStore) UpdateTask(taskId string, state TaskState) error {
+func (t *TaskStore) Update(taskId string, state TaskState) error {
 	t.Lock()
 	defer t.Unlock()
 
-	task, ok := t.Tasks[taskId]
+	task, ok := t.tasks[taskId]
 	if !ok {
 		return fmt.Errorf("task Id '%s' not found, update ignored", taskId)
 	}
@@ -47,23 +53,23 @@ func (t *TaskStore) UpdateTask(taskId string, state TaskState) error {
 	return nil
 }
 
-func (t *TaskStore) TaskIds() []string {
+func (t *TaskStore) Ids() []string {
 	t.RLock()
 	defer t.RUnlock()
 
 	keys := make([]string, 0)
-	for key := range t.Tasks {
+	for key := range t.tasks {
 		keys = append(keys, key)
 	}
 
 	return keys
 }
 
-func (t *TaskStore) TaskState(taskId string) (TaskState, error) {
+func (t *TaskStore) State(taskId string) (TaskState, error) {
 	t.RLock()
 	defer t.RUnlock()
 
-	task, ok := t.Tasks[taskId]
+	task, ok := t.tasks[taskId]
 	if !ok {
 		return TaskState_UNKNOWN, fmt.Errorf("task Id '%s' not found", taskId)
 	}
@@ -75,7 +81,7 @@ func (t *TaskStore) MesosTask(taskId string) (*mesos.MesosTask, error) {
 	t.RLock()
 	defer t.RUnlock()
 
-	task, ok := t.Tasks[taskId]
+	task, ok := t.tasks[taskId]
 	if !ok {
 		return nil, fmt.Errorf("task Id '%s' not found", taskId)
 	}

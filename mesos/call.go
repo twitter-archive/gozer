@@ -118,7 +118,7 @@ func (d *Driver) send(m *mesos_scheduler.Call) error {
 	req, err := http.NewRequest("POST", registerUrl, bytes.NewReader(buffer))
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("Content-type", "application/octet-stream")
-	req.Header.Add("Libprocess-From", fmt.Sprintf("%s@%s:%d", d.config.FrameworkName, d.localIp, d.localPort))
+	req.Header.Add("Libprocess-From", fmt.Sprintf("%s@%s:%d", d.config.FrameworkName, d.pidIp, d.pidPort))
 
 	resp, err := client.Do(req)
 	if err != nil {

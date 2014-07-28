@@ -4,10 +4,10 @@ import (
 	"log"
 )
 
-type mesosError int
+type stateErrorId int
 
 const (
-	errorNone mesosError = iota
+	errorNone stateErrorId = iota
 	errorNotInitialized
 	errorNotConnected
 	errorNotReady

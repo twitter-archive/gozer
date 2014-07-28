@@ -8,19 +8,20 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
+// TODO(dhamon): custom driver logger
 
+func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 	switch *event.Type {
 	case mesos_scheduler.Event_REGISTERED:
-		log.Print("Event REGISTERED: ", event)
+		log.Println("Event REGISTERED: ", event)
 
 	case mesos_scheduler.Event_REREGISTERED:
-		log.Print("Event REREGISTERED: ", event)
+		log.Println("Event REREGISTERED: ", event)
 
 	case mesos_scheduler.Event_OFFERS:
 		for _, offer := range event.Offers.Offers {
 			if *offer.FrameworkId.Value != *d.frameworkId.Value {
-				log.Print("Unexpected framework in offer: want %q, got %q",
+				log.Printf("unexpected framework in offer: want %q, got %q",
 					*d.frameworkId.Value, *offer.FrameworkId.Value)
 				continue
 			}
@@ -29,14 +30,16 @@ func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 				d.Offers <- offer
 			} else {
 				// TODO(weingart): how to ignore/return offer?
+				log.Printf("ignoring offer that we have no capacity for: %+v",
+					offer)
 			}
 		}
 
 	case mesos_scheduler.Event_RESCIND:
-		log.Print("Event RESCIND: ", event)
+		log.Printf("Event RESCIND: %+v", event)
 
 	case mesos_scheduler.Event_UPDATE:
-		log.Print("Event UPDATE: ", event)
+		log.Printf("Event UPDATE: %+v", event)
 
 		switch *event.Update.Status.State {
 		case mesos.TaskState_TASK_STAGING,
@@ -55,20 +58,20 @@ func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 				driver:  d,
 			}
 		default:
-			log.Print("Unknown Event_UPDATE: ", event)
+			log.Printf("Unknown Event_UPDATE: %+v", event)
 		}
 
 	case mesos_scheduler.Event_MESSAGE:
-		log.Print("Event MESSAGE: ", event)
+		log.Printf("Event MESSAGE: %+v", event)
 
 	case mesos_scheduler.Event_FAILURE:
-		log.Print("Event FAILURE: ", event)
+		log.Printf("Event FAILURE: %+v", event)
 
 	case mesos_scheduler.Event_ERROR:
-		log.Print("Event ERROR: ", event)
+		log.Printf("Event ERROR: %+v", event)
 
 	default:
-		log.Print("Unexpected Event: ", event)
+		log.Printf("Unexpected Event: %+v", event)
 		return fmt.Errorf("unexpected event type: %q", event.Type)
 	}
 

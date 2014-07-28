@@ -13,13 +13,13 @@ import (
 
 var (
 	user       = flag.String("user", "", "The user to register as")
-	port       = flag.Int("port", 4343, "Port to listen on for HTTP endpoint")
+	port       = flag.Int("port", 4343, "Port to listen on for the API endpoint")
 	master     = flag.String("master", "localhost", "Hostname of the master")
 	masterPort = flag.Int("masterPort", 5050, "Port of the master")
 
-	taskstore = &TaskStore{
-		Tasks: make(map[string]*Task),
-	}
+	taskstore = NewTaskStore()
+
+	// TODO(dhamon): add custom logger
 )
 
 type TaskState int
@@ -53,12 +53,13 @@ func (t TaskState) String() string {
 type Task struct {
 	Id        string           `json:"id"`
 	Command   string           `json:"command"`
-	State     TaskState        `json:"-"`
+	State     TaskState        `json:"state"`
 	mesosTask *mesos.MesosTask `json:"-"`
 	// TODO(dhamon): resource requirements
 }
 
 func startAPI() {
+	http.HandleFunc("/api/addtask", addTaskHandler)
 	log.Printf("api listening on port %d", *port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
 		log.Fatalf("failed to start listening on port %d", *port)
@@ -82,7 +83,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskstore.AddTask(&task)
+	taskstore.Add(&task)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -90,13 +91,12 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
-	http.HandleFunc("/api/addtask", addTaskHandler)
 	go startAPI()
 
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 
-	log.Printf("Registering...")
-	master, err := mesos.New("gozer", *user, *master, *masterPort)
+	log.Println("Registering...")
+	driver, err := mesos.New("gozer", *user, *master, *masterPort)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,42 +116,48 @@ func main() {
 	// they do not encompass the ideas of PENDING (waiting for offers), and ASSIGNED (offer
 	// selected, waiting for running), nor do they encompass tear-down and death.
 	//
-	// For now we use a simple loop to do a very naiive management of tasks, updates, events,
+	// For now we use a simple loop to do a very naive management of tasks, updates, events,
 	// errors, etc.
 	for {
 
 		select {
-		// case <-master.Events:
 
-		case update := <-master.Updates:
-			log.Println("Gozer:", update)
+		case update := <-driver.Updates:
+			log.Println("Gozer status update:", update)
 			update.Ack()
 
 		case <-time.After(5 * time.Second):
-			log.Print("Gozer: timeout, check tasks")
+			log.Println("Gozer: checking for tasks")
 			// After a timeout, see if there any tasks to launch
-			taskIds := taskstore.TaskIds()
+			taskIds := taskstore.Ids()
 			for _, taskId := range taskIds {
-				state, err := taskstore.TaskState(taskId)
-				if err != nil || state != TaskState_INIT {
+				state, err := taskstore.State(taskId)
+				if err != nil {
+					log.Printf("Gozer: error getting task state for task %q: %+v", taskId, err)
+					continue
+				}
+
+				if state != TaskState_INIT {
 					continue
 				}
 
 				mesosTask, err := taskstore.MesosTask(taskId)
 				if err != nil {
-					log.Print(err)
+					log.Printf("Gozer: error getting mesos task for task %q: %+v", taskId, err)
 					continue
 				}
 
-				// Start this task (very naiive method)
-				offer := <-master.Offers
-				err = master.LaunchTask(offer, mesosTask)
+				// Start this task (very naive method)
+				offer := <-driver.Offers
+
+				// TODO(dhamon): Check for resources before launching
+				err = driver.LaunchTask(offer, mesosTask)
 				if err != nil {
-					log.Print(err)
+					log.Printf("Gozer: error launching task %q: %+v", taskId, err)
 					continue
 				}
 
-				taskstore.UpdateTask(taskId, TaskState_STARTING)
+				taskstore.Update(taskId, TaskState_STARTING)
 			}
 		}
 	}

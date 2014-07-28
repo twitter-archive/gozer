@@ -9,7 +9,7 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-func NewDriver(mc *DriverConfig) (d *Driver, err error) {
+func newDriver(mc *DriverConfig) (d *Driver, err error) {
 
 	name, err := os.Hostname()
 	if err != nil {
@@ -23,19 +23,19 @@ func NewDriver(mc *DriverConfig) (d *Driver, err error) {
 	log.Printf("XXX: %s = %+v", name, addrs)
 
 	d = &Driver{
-		config:    *mc,
-		command:   make(chan func(*Driver) error),
-		events:    make(chan *mesos_scheduler.Event, 100),
-		Offers:    make(chan *mesos.Offer, 100),
-		Updates:   make(chan *TaskStateUpdate),
-		localIp:   addrs[0],
-		localPort: 8888, // TODO(weingart): use ephemeral port
+		config:  *mc,
+		command: make(chan func(*Driver) error),
+		events:  make(chan *mesos_scheduler.Event, 100),
+		Offers:  make(chan *mesos.Offer, 100),
+		Updates: make(chan *TaskStateUpdate),
+		pidIp:   addrs[0],
+		pidPort: 8888, // TODO(weingart): use ephemeral port
 	}
 
 	return
 }
 
-func New(framework string, user string, master string, port int) (d *Driver, err error) {
+func New(framework, user, master string, port int) (d *Driver, err error) {
 
 	cf := &DriverConfig{
 		FrameworkName:  framework,
@@ -45,8 +45,7 @@ func New(framework string, user string, master string, port int) (d *Driver, err
 		},
 	}
 
-	d, err = NewDriver(cf)
-	if err == nil {
+	if d, err = newDriver(cf); err == nil {
 		go d.Run()
 	}
 

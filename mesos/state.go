@@ -16,6 +16,6 @@ func (d *Driver) Run() {
 }
 
 func stateStop(d *Driver) stateFn {
-	log.Print("STOP: Stopping framework:", d)
+	log.Print("STOP: Stopping framework: ", d)
 	return nil
 }

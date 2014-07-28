@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+const maxDelay = 2 * time.Minute
+
 // We wait until HTTP Pid endpoint is ready and healthy
 func stateInit(d *Driver) stateFn {
-	log.Print("INIT: Starting framework:", d)
+	log.Println("INIT: Starting framework:", d)
 
 	delay := time.Second
-	healthURL := fmt.Sprintf("http://%s:%d/health", d.localIp, d.localPort)
+	healthURL := fmt.Sprintf("http://%s:%d/health", d.pidIp, d.pidPort)
 
 	// Start Pid endpoint
 	go startServing(d)
@@ -25,9 +27,9 @@ func stateInit(d *Driver) stateFn {
 			break
 		}
 
-		log.Print("INIT: Timeout for URL: ", healthURL, ", error =", err)
+		log.Printf("INIT: Timeout for URL %q: %+v", healthURL, err)
 		time.Sleep(delay)
-		if delay < 2*time.Minute {
+		if delay < maxDelay {
 			delay = delay * 2
 		}
 	}
