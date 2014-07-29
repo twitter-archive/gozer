@@ -16,9 +16,9 @@ func startServing(d *Driver) {
 	})
 	mux.Handle("/", d)
 
-	d.log.Info.Println("Listening on port", d.pidPort)
+	d.config.Log.Info.Println("Listening on port", d.pidPort)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", d.pidPort), mux); err != nil {
-		d.log.Error.Fatal("failed to start listening on port", d.pidPort)
+		d.config.Log.Error.Fatal("failed to start listening on port", d.pidPort)
 	}
 }
 
@@ -26,7 +26,7 @@ func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		d.log.Error.Println("received request with unexpected method. want \"POST\", got", r.Method)
+		d.config.Log.Error.Println("received request with unexpected method. want \"POST\", got", r.Method)
 		return
 	}
 
@@ -35,7 +35,7 @@ func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if pathElements[1] != d.config.FrameworkName {
 		w.WriteHeader(http.StatusNotFound)
 		errStr := fmt.Sprintf("unexpected path. want %q, got %q", d.config.FrameworkName, pathElements[1])
-		d.log.Error.Println(errStr)
+		d.config.Log.Error.Println(errStr)
 		w.Write([]byte(errStr))
 		return
 	}
@@ -43,14 +43,14 @@ func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		d.log.Error.Printf("failed to read body from request %+v: %+v", r, err)
+		d.config.Log.Error.Printf("failed to read body from request %+v: %+v", r, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	event, err := bytesToEvent(pathElements[2], body)
 	if err != nil {
-		d.log.Error.Println(err)
+		d.config.Log.Error.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -8,7 +8,7 @@ const heartbeatTime = time.Minute
 
 func stateReady(d *Driver) stateFn {
 	// Framework is connected, ready and waiting for something to do
-	d.log.Info.Println("STATE: Ready")
+	d.config.Log.Info.Println("STATE: Ready")
 
 	select {
 	case <-time.Tick(heartbeatTime):
@@ -17,7 +17,7 @@ func stateReady(d *Driver) stateFn {
 	case command := <-d.command:
 		stateSendCommand := func(fm *Driver) stateFn {
 			if err := command(fm); err != nil {
-				d.log.Error.Println("Error running command:", err)
+				d.config.Log.Error.Println("Error running command:", err)
 				return stateError
 			}
 			return stateReady
@@ -27,7 +27,7 @@ func stateReady(d *Driver) stateFn {
 	case event := <-d.events:
 		stateReceiveEvent := func(fm *Driver) stateFn {
 			if err := fm.eventDispatch(event); err != nil {
-				d.log.Error.Println("Error dispatching event:", err)
+				d.config.Log.Error.Println("Error dispatching event:", err)
 				return stateError
 			}
 			return stateReady

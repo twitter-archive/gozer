@@ -12,6 +12,6 @@ const (
 
 func stateError(d *Driver) stateFn {
 	// Handle any type of error state
-	d.log.Info.Println("STATE: Error, driver =", d)
+	d.config.Log.Error.Println("STATE: Error, driver =", d)
 	return stateStop
 }

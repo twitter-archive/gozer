@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"flag"
 	"fmt"
 	"net/http"
@@ -21,7 +20,12 @@ var (
 	taskstore = NewTaskStore()
 
 	// TODO(dhamon): flags for log level
-	log = mesos.NewLog("gozer", ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	log = mesos.NewLog(mesos.LogConfig{
+		Prefix: "gozer",
+		Info:   os.Stdout,
+		Warn:   os.Stderr,
+		Error:  os.Stderr},
+	)
 )
 
 type TaskState int
