@@ -1,9 +1,5 @@
 package mesos
 
-import (
-	"log"
-)
-
 // A state function is a function that does stuff, and
 // then returns the next state function to be invoked.
 type stateFn func(*Driver) stateFn
@@ -16,6 +12,6 @@ func (d *Driver) Run() {
 }
 
 func stateStop(d *Driver) stateFn {
-	log.Print("STOP: Stopping framework: ", d)
+	d.log.Info.Println("STOP: Stopping framework:", d)
 	return nil
 }

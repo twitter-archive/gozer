@@ -1,7 +1,7 @@
 package mesos
 
 import (
-	"log"
+	"io/ioutil"
 	"net"
 	"os"
 
@@ -10,7 +10,6 @@ import (
 )
 
 func newDriver(mc *DriverConfig) (d *Driver, err error) {
-
 	name, err := os.Hostname()
 	if err != nil {
 		return
@@ -20,23 +19,23 @@ func newDriver(mc *DriverConfig) (d *Driver, err error) {
 	if err != nil {
 		return
 	}
-	log.Printf("XXX: %s = %+v", name, addrs)
 
 	d = &Driver{
 		config:  *mc,
+		pidIp:   addrs[0],
+		pidPort: 8888, // TODO(weingart): use ephemeral port
+		// TODO(dhamon): set channel filters
+		log:	 NewLog("driver", ioutil.Discard, os.Stdout, os.Stdout, os.Stderr),
 		command: make(chan func(*Driver) error),
 		events:  make(chan *mesos_scheduler.Event, 100),
 		Offers:  make(chan *mesos.Offer, 100),
 		Updates: make(chan *TaskStateUpdate),
-		pidIp:   addrs[0],
-		pidPort: 8888, // TODO(weingart): use ephemeral port
 	}
 
 	return
 }
 
 func New(framework, user, master string, port int) (d *Driver, err error) {
-
 	cf := &DriverConfig{
 		FrameworkName:  framework,
 		RegisteredUser: user,

@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/twitter/gozer/mesos"
@@ -19,7 +20,8 @@ var (
 
 	taskstore = NewTaskStore()
 
-	// TODO(dhamon): add custom logger
+	// TODO(dhamon): flags for log level
+	log = mesos.NewLog("gozer", ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 )
 
 type TaskState int
@@ -60,9 +62,9 @@ type Task struct {
 
 func startAPI() {
 	http.HandleFunc("/api/addtask", addTaskHandler)
-	log.Printf("api listening on port %d", *port)
+	log.Info.Println("api listening on port", *port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
-		log.Fatalf("failed to start listening on port %d", *port)
+		log.Error.Fatal("failed to start listening on port", *port)
 	}
 }
 
@@ -70,14 +72,14 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		log.Printf("received addtask request with unexpected method. want %q, got %q: %+v", "POST", r.Method, r)
+		log.Warn.Printf("received addtask request with unexpected method. want \"POST\", got %q: %+v", r.Method, r)
 	}
 	defer r.Body.Close()
 
 	var task Task
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		log.Printf("ERROR: failed to parse JSON body from addtask request %+v: %+v", r, err)
+		log.Error.Printf("ERROR: failed to parse JSON body from addtask request %+v: %+v", r, err)
 		// TODO(dhamon): Better error for this case.
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -93,12 +95,10 @@ func main() {
 
 	go startAPI()
 
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-
-	log.Println("Registering...")
+	log.Info.Println("Registering")
 	driver, err := mesos.New("gozer", *user, *master, *masterPort)
 	if err != nil {
-		log.Fatal(err)
+		log.Error.Fatal(err)
 	}
 
 	// Shephard all our tasks
@@ -123,17 +123,17 @@ func main() {
 		select {
 
 		case update := <-driver.Updates:
-			log.Println("Gozer status update:", update)
+			log.Info.Println("Status update:", update)
 			update.Ack()
 
 		case <-time.After(5 * time.Second):
-			log.Println("Gozer: checking for tasks")
+			log.Info.Println("Gozer: checking for tasks")
 			// After a timeout, see if there any tasks to launch
 			taskIds := taskstore.Ids()
 			for _, taskId := range taskIds {
 				state, err := taskstore.State(taskId)
 				if err != nil {
-					log.Printf("Gozer: error getting task state for task %q: %+v", taskId, err)
+					log.Error.Printf("Error getting task state for task %q: %+v", taskId, err)
 					continue
 				}
 
@@ -143,7 +143,7 @@ func main() {
 
 				mesosTask, err := taskstore.MesosTask(taskId)
 				if err != nil {
-					log.Printf("Gozer: error getting mesos task for task %q: %+v", taskId, err)
+					log.Error.Printf("Error getting mesos task for task %q: %+v", taskId, err)
 					continue
 				}
 
@@ -153,7 +153,7 @@ func main() {
 				// TODO(dhamon): Check for resources before launching
 				err = driver.LaunchTask(offer, mesosTask)
 				if err != nil {
-					log.Printf("Gozer: error launching task %q: %+v", taskId, err)
+					log.Error.Printf("Error launching task %q: %+v", taskId, err)
 					continue
 				}
 

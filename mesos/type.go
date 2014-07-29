@@ -23,6 +23,8 @@ type Driver struct {
 
 	frameworkId mesos.FrameworkID
 
+	log	*Log
+
 	command chan func(*Driver) error
 	// TODO(weingart): move to internal type to handle master disconnect, error events/etc.
 	events chan *mesos_scheduler.Event

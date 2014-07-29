@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/twitter/gozer/mesos"
@@ -33,7 +32,7 @@ func (t *TaskStore) Add(task *Task) error {
 		Command: task.Command,
 	}
 	t.tasks[task.Id] = task
-	log.Printf("TASK '%s' State * -> %s", task.Id, task.State)
+	log.Debug.Printf("TASK '%s' State * -> %s", task.Id, task.State)
 
 	return nil
 }
@@ -47,7 +46,7 @@ func (t *TaskStore) Update(taskId string, state TaskState) error {
 		return fmt.Errorf("task Id '%s' not found, update ignored", taskId)
 	}
 
-	log.Printf("TASK '%s' State %s -> %s", taskId, task.State, state)
+	log.Debug.Printf("TASK '%s' State %s -> %s", taskId, task.State, state)
 	task.State = state
 
 	return nil
