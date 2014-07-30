@@ -5,6 +5,11 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
+type MesosTask struct {
+	Id      string
+	Command string
+}
+
 func (d *Driver) LaunchTask(offer *mesos.Offer, task *MesosTask) error {
 	d.command <- func(fm *Driver) error {
 		launchType := mesos_scheduler.Call_LAUNCH
