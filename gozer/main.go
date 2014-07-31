@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/twitter/gozer/mesos"
-	mesos_pb "github.com/twitter/gozer/proto/mesos.pb"
 )
 
 var (
@@ -25,36 +24,6 @@ var (
 		Error:  os.Stderr},
 	)
 )
-
-type TaskState string
-
-const (
-	TaskState_INIT     TaskState = "INIT"
-	TaskState_STARTING TaskState = "STARTING"
-	TaskState_RUNNING  TaskState = "RUNNING"
-	TaskState_FINISHED TaskState = "FINISHED"
-	TaskState_FAILED   TaskState = "FAILED"
-	TaskState_KILLED   TaskState = "KILLED"
-	TaskState_LOST     TaskState = "LOST"
-)
-
-var taskStateMap = map[mesos_pb.TaskState]TaskState{
-	mesos_pb.TaskState_TASK_STAGING:  TaskState_STARTING,
-	mesos_pb.TaskState_TASK_STARTING: TaskState_STARTING,
-	mesos_pb.TaskState_TASK_RUNNING:  TaskState_RUNNING,
-	mesos_pb.TaskState_TASK_FINISHED: TaskState_FINISHED,
-	mesos_pb.TaskState_TASK_FAILED:   TaskState_FAILED,
-	mesos_pb.TaskState_TASK_KILLED:   TaskState_KILLED,
-	mesos_pb.TaskState_TASK_LOST:     TaskState_LOST,
-}
-
-type Task struct {
-	Id        string           `json:"id"`
-	Command   string           `json:"command"`
-	State     TaskState        `json:"state"`
-	mesosTask *mesos.MesosTask `json:"-"`
-	// TODO(dhamon): resource requirements
-}
 
 func main() {
 	flag.Parse()
@@ -85,9 +54,7 @@ func main() {
 	// For now we use a simple loop to do a very naive management of tasks, updates, events,
 	// errors, etc.
 	for {
-
 		select {
-
 		case update := <-driver.Updates:
 			log.Info.Println("Status update:", update)
 			state, err := taskstore.State(update.TaskId)
@@ -98,27 +65,19 @@ func main() {
 
 			newState, ok := taskStateMap[update.State]
 			if !ok {
-				log.Error.Printf("Unknown mesos task state: %s", update.State)
+				log.Error.Printf("Unknown mesos task state: %q", update.State)
 				continue
 			}
 
-			log.Info.Println("Updating task state from", state, "to", newState)
-
-			switch newState {
-			case TaskState_FAILED:
-			case TaskState_FINISHED:
-			case TaskState_KILLED:
-			case TaskState_LOST:
-				taskstore.Remove(update.TaskId)
-
-			default:
-				taskstore.Update(update.TaskId, newState)
+			log.Info.Printf("Updating task state from %q to %q", state, newState)
+			if err := taskstore.Update(update.TaskId, newState); err != nil {
+				log.Error.Print(err)
 			}
 
 			update.Ack()
 
 		case <-time.After(5 * time.Second):
-			log.Info.Println("Gozer: checking for tasks")
+			log.Info.Println("Checking for tasks")
 			// After a timeout, see if there any tasks to launch
 			taskIds := taskstore.Ids()
 			for _, taskId := range taskIds {

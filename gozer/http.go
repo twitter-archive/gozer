@@ -9,6 +9,7 @@ import (
 var taskIndex = 0
 
 func startHTTP() {
+	http.HandleFunc("/tasks", tasksHandler)
 	http.HandleFunc("/api/addtask", addTaskHandler)
 	log.Info.Printf("API listening on port %d", *port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
@@ -41,4 +42,10 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	taskstore.Add(&task)
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func tasksHandler(w http.ResponseWriter, r *http.Request) {
+	for task := range(taskstore.tasks) {
+		fmt.Fprintf(w, "%s: %s\n", task, taskstore.tasks[task])
+	}
 }

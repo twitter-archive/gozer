@@ -6,7 +6,7 @@ import (
 )
 
 func stateRegister(d *Driver) stateFn {
-	d.config.Log.Info.Println("REGISTERING: Trying to register framework:", d)
+	d.config.Log.Info.Printf("REGISTERING: Trying to register framework: %+v", d)
 
 	// Create the register message and send it.
 	callType := mesos_scheduler.Call_REGISTER
@@ -21,7 +21,7 @@ func stateRegister(d *Driver) stateFn {
 	// TODO(weingart): This should re-try and backoff
 	err := d.send(registerCall)
 	if err != nil {
-		d.config.Log.Error.Println("Error: sending register:", err)
+		d.config.Log.Error.Println("failed to send register:", err)
 		return stateError
 	}
 

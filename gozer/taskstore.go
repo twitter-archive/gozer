@@ -37,20 +37,6 @@ func (t *TaskStore) Add(task *Task) error {
 	return nil
 }
 
-func (t *TaskStore) Remove(taskId string) error {
-	t.Lock()
-	defer t.Unlock()
-
-	if _, ok := t.tasks[taskId]; !ok {
-		return fmt.Errorf("task Id %q not found; removal ignored", taskId)
-	}
-
-	delete(t.tasks, taskId)
-	log.Info.Printf("TASK %q removed", taskId)
-
-	return nil
-}
-
 func (t *TaskStore) Update(taskId string, state TaskState) error {
 	t.Lock()
 	defer t.Unlock()
@@ -62,6 +48,12 @@ func (t *TaskStore) Update(taskId string, state TaskState) error {
 
 	log.Debug.Printf("TASK %q State %s -> %s", taskId, task.State, state)
 	task.State = state
+
+	if task.isTerminal() {
+		log.Info.Printf("Removing terminal task %q", taskId)
+		delete(t.tasks, taskId)
+		log.Debug.Printf("TASK %q removed", taskId)
+	}
 
 	return nil
 }
