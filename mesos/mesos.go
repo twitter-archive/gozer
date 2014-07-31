@@ -1,7 +1,6 @@
 package mesos
 
 import (
-	"log"
 	"net"
 	"os"
 
@@ -14,16 +13,17 @@ type MasterAddress struct {
 	Port     int
 }
 
-type DriverConfig struct {
+type driverConfig struct {
 	FrameworkName  string
 	RegisteredUser string
 	Masters        []MasterAddress
+	Log            Log
 }
 
 type Driver struct {
-	config    DriverConfig
-	pidIp     string
-	pidPort   int
+	config  driverConfig
+	pidIp   string
+	pidPort int
 
 	frameworkId mesos.FrameworkID
 
@@ -35,8 +35,7 @@ type Driver struct {
 	Updates chan *TaskStateUpdate
 }
 
-func newDriver(mc *DriverConfig) (d *Driver, err error) {
-
+func newDriver(mc *driverConfig) (d *Driver, err error) {
 	name, err := os.Hostname()
 	if err != nil {
 		return
@@ -46,29 +45,34 @@ func newDriver(mc *DriverConfig) (d *Driver, err error) {
 	if err != nil {
 		return
 	}
-	log.Printf("XXX: %s = %+v", name, addrs)
 
 	d = &Driver{
 		config:  *mc,
+		pidIp:   addrs[0],
+		pidPort: 8888, // TODO(weingart): use ephemeral port
 		command: make(chan func(*Driver) error),
 		events:  make(chan *mesos_scheduler.Event, 100),
 		Offers:  make(chan *mesos.Offer, 100),
 		Updates: make(chan *TaskStateUpdate),
-		pidIp:   addrs[0],
-		pidPort: 8888, // TODO(weingart): use ephemeral port
 	}
 
 	return
 }
 
 func New(framework, user, master string, port int) (d *Driver, err error) {
-
-	cf := &DriverConfig{
+	cf := &driverConfig{
 		FrameworkName:  framework,
 		RegisteredUser: user,
 		Masters: []MasterAddress{
 			MasterAddress{Hostname: master, Port: port},
 		},
+		// TODO(dhamon): set channel filters based on log level
+		Log: NewLog(LogConfig{
+			Prefix: "driver",
+			Info:   os.Stdout,
+			Warn:   os.Stdout,
+			Error:  os.Stderr},
+		),
 	}
 
 	if d, err = newDriver(cf); err == nil {

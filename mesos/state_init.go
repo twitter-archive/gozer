@@ -2,7 +2,6 @@ package mesos
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 )
@@ -11,7 +10,7 @@ const maxDelay = 2 * time.Minute
 
 // We wait until HTTP Pid endpoint is ready and healthy
 func stateInit(d *Driver) stateFn {
-	log.Println("INIT: Starting framework:", d)
+	d.config.Log.Info.Println("INIT: Starting framework:", d)
 
 	delay := time.Second
 	healthURL := fmt.Sprintf("http://%s:%d/health", d.pidIp, d.pidPort)
@@ -27,7 +26,7 @@ func stateInit(d *Driver) stateFn {
 			break
 		}
 
-		log.Printf("INIT: Timeout for URL %q: %+v", healthURL, err)
+		d.config.Log.Warn.Printf("INIT: Timeout for URL %q: %+v", healthURL, err)
 		time.Sleep(delay)
 		if delay < maxDelay {
 			delay = delay * 2

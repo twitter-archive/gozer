@@ -1,9 +1,5 @@
 package mesos
 
-import (
-	"log"
-)
-
 type stateErrorId int
 
 const (
@@ -16,6 +12,6 @@ const (
 
 func stateError(d *Driver) stateFn {
 	// Handle any type of error state
-	log.Print("STATE: Error, MesosMaster = ", d)
+	d.config.Log.Error.Println("STATE: Error, driver =", d)
 	return stateStop
 }

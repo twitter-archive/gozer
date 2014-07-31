@@ -3,7 +3,6 @@ package mesos
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -17,9 +16,9 @@ func startServing(d *Driver) {
 	})
 	mux.Handle("/", d)
 
-	log.Printf("Listening on port %d", d.pidPort)
+	d.config.Log.Info.Println("Listening on port", d.pidPort)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", d.pidPort), mux); err != nil {
-		log.Fatalf("failed to start listening on port %d", d.pidPort)
+		d.config.Log.Error.Fatal("failed to start listening on port", d.pidPort)
 	}
 }
 
@@ -27,7 +26,7 @@ func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Add("Allow", "POST")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		log.Printf("received request with unexpected method. want %q, got %q: %+v", "POST", r.Method, r)
+		d.config.Log.Error.Println("received request with unexpected method. want \"POST\", got", r.Method)
 		return
 	}
 
@@ -35,22 +34,23 @@ func (d *Driver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if pathElements[1] != d.config.FrameworkName {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(fmt.Sprintf("unexpected path. want %q, got %q", d.config.FrameworkName, pathElements[1])))
-		log.Printf("received request with unexpected path. want %q, got %q: %+v", d.config.FrameworkName, pathElements[1], r)
+		errStr := fmt.Sprintf("unexpected path. want %q, got %q", d.config.FrameworkName, pathElements[1])
+		d.config.Log.Error.Println(errStr)
+		w.Write([]byte(errStr))
 		return
 	}
 
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("ERROR: failed to read body from request %+v: %+v", r, err)
+		d.config.Log.Error.Printf("failed to read body from request %+v: %+v", r, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	event, err := bytesToEvent(pathElements[2], body)
 	if err != nil {
-		log.Printf("ERROR: %+v", err)
+		d.config.Log.Error.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
