@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"net/http"
 	"os"
 	"time"
 
