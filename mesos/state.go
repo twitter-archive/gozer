@@ -9,6 +9,7 @@ func (d *Driver) Run() {
 	for state := stateInit; state != nil; {
 		state = state(d)
 	}
+	// TODO(dhamon): signal framework that the driver has stopped.
 }
 
 func stateStop(d *Driver) stateFn {
