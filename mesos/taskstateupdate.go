@@ -17,7 +17,7 @@ type TaskStateUpdate struct {
 }
 
 func (u *TaskStateUpdate) String() string {
-	return fmt.Sprintf("update %s, task '%s' on slave '%s', state = %s",
+	return fmt.Sprintf("%s: task %q on slave %q [%s]",
 		u.uuid.String(),
 		u.TaskId,
 		u.SlaveId,

@@ -10,7 +10,7 @@ type MesosTask struct {
 	Command string
 }
 
-func (d *Driver) LaunchTask(offer *mesos.Offer, task *MesosTask) error {
+func (d *Driver) LaunchTask(offer *Offer, task *MesosTask) error {
 	d.command <- func(fm *Driver) error {
 		launchType := mesos_scheduler.Call_LAUNCH
 		launchCall := &mesos_scheduler.Call{
@@ -27,15 +27,15 @@ func (d *Driver) LaunchTask(offer *mesos.Offer, task *MesosTask) error {
 						TaskId: &mesos.TaskID{
 							Value: &task.Id,
 						},
-						SlaveId:   offer.SlaveId,
-						Resources: offer.Resources,
+						SlaveId:   offer.mesosOffer.SlaveId,
+						Resources: offer.mesosOffer.Resources,
 						Command: &mesos.CommandInfo{
 							Value: &task.Command,
 						},
 					},
 				},
 				OfferIds: []*mesos.OfferID{
-					offer.Id,
+					offer.mesosOffer.Id,
 				},
 			},
 		}

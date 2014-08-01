@@ -24,7 +24,11 @@ func (d *Driver) eventDispatch(event *mesos_scheduler.Event) error {
 			}
 
 			if len(d.Offers) < cap(d.Offers) {
-				d.Offers <- offer
+				d.Offers <- &Offer{
+					Id:	    *offer.Id.Value,
+					driver:	    d,
+					mesosOffer: offer,
+				}
 			} else {
 				// TODO(weingart): how to ignore/return offer?
 				d.config.Log.Warn.Println("ignoring offer that we have no capacity for:", offer)
