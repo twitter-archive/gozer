@@ -83,6 +83,52 @@ func bytesToEvent(protoType string, data []byte) (*mesos_scheduler.Event, error)
 				Status: message.Update.Status,
 			},
 		}, nil
+
+	case "mesos.internal.ExitedExecutorMessage":
+		message := new(mesos_internal.ExitedExecutorMessage)
+		err := proto.Unmarshal(data, message)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal %q into message of type %q: %+v", string(data), protoType, err)
+		}
+		eventType := mesos_scheduler.Event_FAILURE
+		return &mesos_scheduler.Event{
+			Type: &eventType,
+			Failure: &mesos_scheduler.Event_Failure{
+				SlaveId: message.SlaveId,
+				ExecutorId: message.ExecutorId,
+				Status: message.Status,
+			},
+		}, nil
+
+	case "mesos.internal.ExecutorToFrameworkMessage":
+		message := new(mesos_internal.ExecutorToFrameworkMessage)
+		err := proto.Unmarshal(data, message)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal %q into message of type %q: %+v", string(data), protoType, err)
+		}
+		eventType := mesos_scheduler.Event_MESSAGE
+		return &mesos_scheduler.Event{
+			Type: &eventType,
+			Message: &mesos_scheduler.Event_Message{
+				SlaveId: message.SlaveId,
+				ExecutorId: message.ExecutorId,
+				Data: data,
+			},
+		}, nil
+
+	case "mesos.internal.FrameworkErrorMessage":
+		message := new(mesos_internal.FrameworkErrorMessage)
+		err := proto.Unmarshal(data, message)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal %q into message of type %q: %+v", string(data), protoType, err)
+		}
+		eventType := mesos_scheduler.Event_ERROR
+		return &mesos_scheduler.Event{
+			Type: &eventType,
+			Error: &mesos_scheduler.Event_Error{
+				Message: message.Message,
+			},
+		}, nil
 	}
 
 	return nil, fmt.Errorf("unimplemented event type %q", protoType)
