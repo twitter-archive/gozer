@@ -45,13 +45,10 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func tasksHandler(w http.ResponseWriter, r *http.Request) {
-	content, err := json.Marshal(taskstore.tasks)
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(taskstore.tasks)
 	if err != nil {
 		log.Error.Printf("Failed to marshal %+v to JSON: %+v", taskstore.tasks, err)
 		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(content)
 }
