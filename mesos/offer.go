@@ -42,7 +42,7 @@ func (o *Offer) String() string {
 		*o.mesosOffer.SlaveId.Value)
 }
 
-func (o Offer) Decline() {
+func (o *Offer) Decline() {
 	o.driver.command <- func(d *Driver) error {
 		declineType := mesos_scheduler.Call_DECLINE
 		declineCall := &mesos_scheduler.Call{
