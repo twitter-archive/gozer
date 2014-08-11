@@ -31,7 +31,7 @@ type Driver struct {
 	// TODO(weingart): move to internal type to handle master disconnect, error events/etc.
 	events chan *mesos_scheduler.Event
 
-	Offers  chan *mesos.Offer
+	Offers  chan *Offer
 	Updates chan *TaskStateUpdate
 }
 
@@ -52,7 +52,7 @@ func newDriver(mc *driverConfig) (d *Driver, err error) {
 		pidPort: 8888, // TODO(weingart): use ephemeral port
 		command: make(chan func(*Driver) error),
 		events:  make(chan *mesos_scheduler.Event, 100),
-		Offers:  make(chan *mesos.Offer, 100),
+		Offers:  make(chan *Offer, 100),
 		Updates: make(chan *TaskStateUpdate),
 	}
 

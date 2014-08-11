@@ -18,7 +18,8 @@ var (
 		mesos_scheduler.Call_REREGISTER: "mesos.internal.ReregisterFrameworkMessage",
 		mesos_scheduler.Call_UNREGISTER: "mesos.internal.UnregisterFrameworkMessage",
 		mesos_scheduler.Call_REQUEST:    "mesos.internal.ResourceRequestMessage",
-		// mesos_scheduler.Call_DECLINE
+		// Decline is implemented as a call to LaunchTasks with no tasks.
+		mesos_scheduler.Call_DECLINE:	 "mesos.internal.LaunchTasksMessage",
 		// mesos_scheduler.Call_REVIVE
 		mesos_scheduler.Call_LAUNCH:      "mesos.internal.LaunchTasksMessage",
 		mesos_scheduler.Call_KILL:        "mesos.internal.KillTaskMessage",
@@ -90,7 +91,19 @@ func callToMessage(m *mesos_scheduler.Call) (proto.Message, error) {
 			FrameworkId: m.FrameworkInfo.Id,
 			Statuses:    m.Reconcile.Statuses,
 		}, nil
+
+	case mesos_scheduler.Call_DECLINE:
+		filters := m.Decline.Filters
+		if filters == nil {
+			filters = &mesos.Filters{}
+		}
+		return &mesos_internal.LaunchTasksMessage{
+			FrameworkId: m.FrameworkInfo.Id,
+			OfferIds:    m.Decline.OfferIds,
+			Filters:     filters,
+		}, nil
 	}
+
 
 	return nil, fmt.Errorf("unimplemented call type %q", *m.Type)
 }

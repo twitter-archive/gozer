@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"os"
-	"time"
 
 	"github.com/twitter/gozer/mesos"
 )
@@ -56,7 +55,7 @@ func main() {
 	for {
 		select {
 		case update := <-driver.Updates:
-			log.Info.Println("Status update:", update)
+			log.Info.Printf("Received update: %+v", update)
 			state, err := taskstore.State(update.TaskId)
 			if err != nil {
 				log.Error.Printf("Failed to get current state for updated task %q: %+s", update.TaskId, err)
@@ -76,10 +75,11 @@ func main() {
 
 			update.Ack()
 
-		case <-time.After(5 * time.Second):
-			log.Info.Println("Checking for tasks")
-			// After a timeout, see if there any tasks to launch
+		case offer := <-driver.Offers:
+			log.Info.Printf("Received offer: %+v", offer)
+
 			taskIds := taskstore.Ids()
+			launched := false
 			for _, taskId := range taskIds {
 				state, err := taskstore.State(taskId)
 				if err != nil {
@@ -97,10 +97,8 @@ func main() {
 					continue
 				}
 
-				// Start this task (very naive method)
-				offer := <-driver.Offers
-
-				// TODO(dhamon): Check for resources before launching
+				// TODO(dhamon): Check for resource match before launching.
+				log.Info.Printf("Launching task %s", taskId)
 				err = driver.LaunchTask(offer, mesosTask)
 				if err != nil {
 					log.Error.Printf("Error launching task %q: %+v", taskId, err)
@@ -108,6 +106,13 @@ func main() {
 				}
 
 				taskstore.Update(taskId, TaskState_STARTING)
+				launched = true
+				break
+			}
+
+			if !launched {
+				log.Info.Printf("Declining offer %s", offer.Id)
+				offer.Decline()
 			}
 		}
 	}
