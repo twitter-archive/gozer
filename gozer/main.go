@@ -52,9 +52,15 @@ func main() {
 	//
 	// For now we use a simple loop to do a very naive management of tasks, updates, events,
 	// errors, etc.
-	for {
+	exit := false
+	for !exit {
 		select {
-		case update := <-driver.Updates:
+		case update, ok := <-driver.Updates:
+			if !ok {
+				log.Info.Printf("Update channel closed. Exiting")
+				exit = true
+				break
+			}
 			log.Info.Printf("Received update: %+v", update)
 			state, err := taskstore.State(update.TaskId)
 			if err != nil {
@@ -75,7 +81,12 @@ func main() {
 
 			update.Ack()
 
-		case offer := <-driver.Offers:
+		case offer, ok := <-driver.Offers:
+			if !ok {
+				log.Info.Printf("Offer channel closed. Exiting")
+				exit = true
+				break
+			}
 			log.Info.Printf("Received offer: %+v", offer)
 
 			taskIds := taskstore.Ids()
