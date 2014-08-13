@@ -7,12 +7,7 @@ import (
 	"github.com/twitter/gozer/proto/scheduler.pb"
 )
 
-const (
-	maxRegisterAttempt = 5
-	maxRegisterWait = 10 * time.Second
-)
-
-var registerBackoff = 1 * time.Second
+const maxRegisterWait = 20 * time.Second
 
 func stateRegister(d *Driver) stateFn {
 	d.config.Log.Info.Printf("REGISTERING: Trying to register framework: %+v", d)
@@ -27,40 +22,39 @@ func stateRegister(d *Driver) stateFn {
 		},
 	}
 
-	count := 0
-	for count < maxRegisterAttempt {
-		err := d.send(registerCall)
-		if err != nil {
-			d.config.Log.Warn.Println("Failed to send register:", err)
-			d.config.Log.Warn.Printf("Waiting for %s before trying again.", registerBackoff)
-			time.Sleep(registerBackoff)
-			registerBackoff = registerBackoff * 2
-			count = count + 1
-			continue
-		}
-		break
-	}
+	err := d.send(registerCall)
+	registerBackoff := 1 * time.Second
 
-	if count == maxRegisterAttempt {
-		d.config.Log.Error.Printf("Failed to register after %d attempts.", maxRegisterAttempt)
-		return stateError
+	if err != nil {
+		d.config.Log.Warn.Println("Failed to send register:", err)
+		d.config.Log.Warn.Printf("Waiting for %s before trying again.", registerBackoff)
 	}
 
 	// Wait for Registered event, throw away any other events
-	for {
+	registered := false
+	for !registered {
 		select{
 		case event := <-d.events:
 			if *event.Type != mesos_scheduler.Event_REGISTERED {
 				d.config.Log.Error.Printf("Unexpected event type: want %q, got %+v",
 					mesos_scheduler.Event_REGISTERED, *event.Type)
+				continue
 			}
 			d.frameworkId = *event.Registered.FrameworkId
+			registered = true
 			break
 
-		// TODO(weingart): This should try again with backoff.
 		case <-time.After(maxRegisterWait):
 			d.config.Log.Error.Printf("Failed to register after %s", maxRegisterWait)
 			return stateError
+
+		case <-time.After(registerBackoff):
+			err := d.send(registerCall)
+			if err != nil {
+				registerBackoff = registerBackoff * 2
+				d.config.Log.Warn.Println("Failed to send register:", err)
+				d.config.Log.Warn.Printf("Waiting for %s before trying again.", registerBackoff)
+			}
 		}
 	}
 
