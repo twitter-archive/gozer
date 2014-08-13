@@ -81,10 +81,3 @@ func New(framework, user, master string, port int) (d *Driver, err error) {
 
 	return
 }
-
-func (d *Driver) stop() {
-	close(d.Updates)
-	close(d.Offers)
-	close(d.events)
-	close(d.command)
-}
