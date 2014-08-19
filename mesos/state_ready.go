@@ -14,7 +14,10 @@ func stateReady(d *Driver) stateFn {
 	case <-time.Tick(heartbeatTime):
 		return stateHeartbeat
 
-	case command := <-d.command:
+	case command, ok := <-d.command:
+		if !ok {
+			return stateStop
+		}
 		stateSendCommand := func(fm *Driver) stateFn {
 			if err := command(fm); err != nil {
 				d.config.Log.Error.Println("Failed to run command:", err)
@@ -24,7 +27,10 @@ func stateReady(d *Driver) stateFn {
 		}
 		return stateSendCommand
 
-	case event := <-d.events:
+	case event, ok := <-d.events:
+		if !ok {
+			return stateStop
+		}
 		stateReceiveEvent := func(fm *Driver) stateFn {
 			if err := fm.eventDispatch(event); err != nil {
 				d.config.Log.Error.Println("Failed to dispatch event:", err)
