@@ -2,76 +2,16 @@
 // source: messages.proto
 // DO NOT EDIT!
 
-/*
-Package mesos_internal is a generated protocol buffer package.
-
-It is generated from these files:
-	messages.proto
-
-It has these top-level messages:
-	Task
-	RoleInfo
-	StatusUpdate
-	StatusUpdateRecord
-	SubmitSchedulerRequest
-	SubmitSchedulerResponse
-	ExecutorToFrameworkMessage
-	FrameworkToExecutorMessage
-	RegisterFrameworkMessage
-	ReregisterFrameworkMessage
-	FrameworkRegisteredMessage
-	FrameworkReregisteredMessage
-	UnregisterFrameworkMessage
-	DeactivateFrameworkMessage
-	ResourceRequestMessage
-	ResourceOffersMessage
-	LaunchTasksMessage
-	RescindResourceOfferMessage
-	ReviveOffersMessage
-	RunTaskMessage
-	KillTaskMessage
-	StatusUpdateMessage
-	StatusUpdateAcknowledgementMessage
-	LostSlaveMessage
-	ReconcileTasksMessage
-	FrameworkErrorMessage
-	RegisterSlaveMessage
-	ReregisterSlaveMessage
-	SlaveRegisteredMessage
-	SlaveReregisteredMessage
-	UnregisterSlaveMessage
-	HeartbeatMessage
-	ShutdownFrameworkMessage
-	ShutdownExecutorMessage
-	UpdateFrameworkMessage
-	RegisterExecutorMessage
-	ExecutorRegisteredMessage
-	ExecutorReregisteredMessage
-	ExitedExecutorMessage
-	ReconnectExecutorMessage
-	ReregisterExecutorMessage
-	RegisterProjdMessage
-	ProjdReadyMessage
-	ProjdUpdateResourcesMessage
-	FrameworkExpiredMessage
-	ShutdownMessage
-	AuthenticateMessage
-	AuthenticationMechanismsMessage
-	AuthenticationStartMessage
-	AuthenticationStepMessage
-	AuthenticationCompletedMessage
-	AuthenticationFailedMessage
-	AuthenticationErrorMessage
-	Archive
-*/
 package mesos_internal
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 import mesos "github.com/twitter/gozer/proto/mesos.pb"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
 type StatusUpdateRecord_Type int32
@@ -98,6 +38,9 @@ func (x StatusUpdateRecord_Type) Enum() *StatusUpdateRecord_Type {
 func (x StatusUpdateRecord_Type) String() string {
 	return proto.EnumName(StatusUpdateRecord_Type_name, int32(x))
 }
+func (x StatusUpdateRecord_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *StatusUpdateRecord_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(StatusUpdateRecord_Type_value, data, "StatusUpdateRecord_Type")
 	if err != nil {
@@ -107,17 +50,6 @@ func (x *StatusUpdateRecord_Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// TODO(benh): It would be great if this could just be a
-// TaskInfo wherever it gets used! However, doing so would
-// require adding the framework_id field, the executor_id field, and
-// the state field into TaskInfo though (or send them another
-// way). Also, one performance reason why we don't do that now is
-// because storing whatever data is coupled with a TaskInfo
-// could be large and unnecessary.
-// TODO(bmahler): Add executor_uuid here, and send it to the master. This will
-// allow us to expose executor work directories for tasks in the webui when
-// looking from the master level. Currently only the slave knows which run the
-// task belongs to.
 type Task struct {
 	Name             *string             `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
 	TaskId           *mesos.TaskID       `protobuf:"bytes,2,req,name=task_id" json:"task_id,omitempty"`
@@ -173,7 +105,7 @@ func (m *Task) GetState() mesos.TaskState {
 	if m != nil && m.State != nil {
 		return *m.State
 	}
-	return mesos.TaskState_TASK_STAGING
+	return 0
 }
 
 func (m *Task) GetResources() []*mesos.Resource {
@@ -190,9 +122,6 @@ func (m *Task) GetStatuses() []*mesos.TaskStatus {
 	return nil
 }
 
-// Describes a role, which are used to group frameworks for allocation
-// decisions, depending on the allocation policy being used.
-// The weight field can be used to indicate forms of priority.
 type RoleInfo struct {
 	Name             *string  `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
 	Weight           *float64 `protobuf:"fixed64,2,opt,name=weight,def=1" json:"weight,omitempty"`
@@ -275,9 +204,6 @@ func (m *StatusUpdate) GetUuid() []byte {
 	return nil
 }
 
-// This message encapsulates how we checkpoint a status update to disk.
-// NOTE: If type == UPDATE, the 'update' field is required.
-// NOTE: If type == ACK, the 'uuid' field is required.
 type StatusUpdateRecord struct {
 	Type             *StatusUpdateRecord_Type `protobuf:"varint,1,req,name=type,enum=mesos.internal.StatusUpdateRecord_Type" json:"type,omitempty"`
 	Update           *StatusUpdate            `protobuf:"bytes,2,opt,name=update" json:"update,omitempty"`
@@ -293,7 +219,7 @@ func (m *StatusUpdateRecord) GetType() StatusUpdateRecord_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return StatusUpdateRecord_UPDATE
+	return 0
 }
 
 func (m *StatusUpdateRecord) GetUpdate() *StatusUpdate {
@@ -592,7 +518,6 @@ func (m *ResourceOffersMessage) GetPids() []string {
 
 type LaunchTasksMessage struct {
 	FrameworkId      *mesos.FrameworkID `protobuf:"bytes,1,req,name=framework_id" json:"framework_id,omitempty"`
-	OfferId          *mesos.OfferID     `protobuf:"bytes,2,opt,name=offer_id" json:"offer_id,omitempty"`
 	Tasks            []*mesos.TaskInfo  `protobuf:"bytes,3,rep,name=tasks" json:"tasks,omitempty"`
 	Filters          *mesos.Filters     `protobuf:"bytes,5,req,name=filters" json:"filters,omitempty"`
 	OfferIds         []*mesos.OfferID   `protobuf:"bytes,6,rep,name=offer_ids" json:"offer_ids,omitempty"`
@@ -606,13 +531,6 @@ func (*LaunchTasksMessage) ProtoMessage()    {}
 func (m *LaunchTasksMessage) GetFrameworkId() *mesos.FrameworkID {
 	if m != nil {
 		return m.FrameworkId
-	}
-	return nil
-}
-
-func (m *LaunchTasksMessage) GetOfferId() *mesos.OfferID {
-	if m != nil {
-		return m.OfferId
 	}
 	return nil
 }
@@ -711,8 +629,6 @@ func (m *RunTaskMessage) GetTask() *mesos.TaskInfo {
 }
 
 type KillTaskMessage struct {
-	// TODO(bmahler): Include the SlaveID here to improve the Master's
-	// ability to respond for non-activated slaves.
 	FrameworkId      *mesos.FrameworkID `protobuf:"bytes,1,req,name=framework_id" json:"framework_id,omitempty"`
 	TaskId           *mesos.TaskID      `protobuf:"bytes,2,req,name=task_id" json:"task_id,omitempty"`
 	XXX_unrecognized []byte             `json:"-"`
@@ -736,8 +652,6 @@ func (m *KillTaskMessage) GetTaskId() *mesos.TaskID {
 	return nil
 }
 
-// NOTE: If 'pid' is present, scheduler driver sends an
-// acknowledgement to the pid.
 type StatusUpdateMessage struct {
 	Update           *StatusUpdate `protobuf:"bytes,1,req,name=update" json:"update,omitempty"`
 	Pid              *string       `protobuf:"bytes,2,opt,name=pid" json:"pid,omitempty"`
@@ -875,8 +789,6 @@ func (m *RegisterSlaveMessage) GetSlave() *mesos.SlaveInfo {
 }
 
 type ReregisterSlaveMessage struct {
-	// TODO(bmahler): Deprecate and remove the explicit slave_id as
-	// SlaveInfo already includes this information.
 	SlaveId             *mesos.SlaveID        `protobuf:"bytes,1,req,name=slave_id" json:"slave_id,omitempty"`
 	Slave               *mesos.SlaveInfo      `protobuf:"bytes,2,req,name=slave" json:"slave,omitempty"`
 	ExecutorInfos       []*mesos.ExecutorInfo `protobuf:"bytes,4,rep,name=executor_infos" json:"executor_infos,omitempty"`
@@ -988,7 +900,6 @@ func (m *HeartbeatMessage) GetSlaveId() *mesos.SlaveID {
 	return nil
 }
 
-// Tells a slave to shut down all executors of the given framework.
 type ShutdownFrameworkMessage struct {
 	FrameworkId      *mesos.FrameworkID `protobuf:"bytes,1,req,name=framework_id" json:"framework_id,omitempty"`
 	XXX_unrecognized []byte             `json:"-"`
@@ -1005,8 +916,6 @@ func (m *ShutdownFrameworkMessage) GetFrameworkId() *mesos.FrameworkID {
 	return nil
 }
 
-// Tells the executor to initiate a shut down by invoking
-// Executor::shutdown.
 type ShutdownExecutorMessage struct {
 	XXX_unrecognized []byte `json:"-"`
 }
@@ -1415,8 +1324,6 @@ func (m *AuthenticationErrorMessage) GetError() string {
 	return ""
 }
 
-// *
-// Describes Completed Frameworks, etc. for archival.
 type Archive struct {
 	Frameworks       []*Archive_Framework `protobuf:"bytes,1,rep,name=frameworks" json:"frameworks,omitempty"`
 	XXX_unrecognized []byte               `json:"-"`
@@ -1463,6 +1370,48 @@ func (m *Archive_Framework) GetTasks() []*Task {
 		return m.Tasks
 	}
 	return nil
+}
+
+type TaskHealthStatus struct {
+	TaskId              *mesos.TaskID `protobuf:"bytes,1,req,name=task_id" json:"task_id,omitempty"`
+	Healthy             *bool         `protobuf:"varint,2,req,name=healthy" json:"healthy,omitempty"`
+	KillTask            *bool         `protobuf:"varint,3,opt,name=kill_task,def=0" json:"kill_task,omitempty"`
+	ConsecutiveFailures *int32        `protobuf:"varint,4,opt,name=consecutive_failures" json:"consecutive_failures,omitempty"`
+	XXX_unrecognized    []byte        `json:"-"`
+}
+
+func (m *TaskHealthStatus) Reset()         { *m = TaskHealthStatus{} }
+func (m *TaskHealthStatus) String() string { return proto.CompactTextString(m) }
+func (*TaskHealthStatus) ProtoMessage()    {}
+
+const Default_TaskHealthStatus_KillTask bool = false
+
+func (m *TaskHealthStatus) GetTaskId() *mesos.TaskID {
+	if m != nil {
+		return m.TaskId
+	}
+	return nil
+}
+
+func (m *TaskHealthStatus) GetHealthy() bool {
+	if m != nil && m.Healthy != nil {
+		return *m.Healthy
+	}
+	return false
+}
+
+func (m *TaskHealthStatus) GetKillTask() bool {
+	if m != nil && m.KillTask != nil {
+		return *m.KillTask
+	}
+	return Default_TaskHealthStatus_KillTask
+}
+
+func (m *TaskHealthStatus) GetConsecutiveFailures() int32 {
+	if m != nil && m.ConsecutiveFailures != nil {
+		return *m.ConsecutiveFailures
+	}
+	return 0
 }
 
 func init() {

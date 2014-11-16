@@ -2,54 +2,17 @@
 // source: mesos.proto
 // DO NOT EDIT!
 
-/*
-Package mesos is a generated protocol buffer package.
-
-It is generated from these files:
-	mesos.proto
-
-It has these top-level messages:
-	FrameworkID
-	OfferID
-	SlaveID
-	TaskID
-	ExecutorID
-	ContainerID
-	FrameworkInfo
-	HealthCheck
-	CommandInfo
-	ExecutorInfo
-	MasterInfo
-	SlaveInfo
-	Value
-	Attribute
-	Resource
-	ResourceStatistics
-	ResourceUsage
-	Request
-	Offer
-	TaskInfo
-	TaskStatus
-	Filters
-	Environment
-	Parameter
-	Parameters
-	Credential
-	ACL
-	ACLs
-*/
 package mesos
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
-// *
-// Status is used to indicate the state of the scheduler and executor
-// driver after function calls.
 type Status int32
 
 const (
@@ -80,6 +43,9 @@ func (x Status) Enum() *Status {
 func (x Status) String() string {
 	return proto.EnumName(Status_name, int32(x))
 }
+func (x Status) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Status) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Status_value, data, "Status")
 	if err != nil {
@@ -89,12 +55,6 @@ func (x *Status) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// *
-// Describes possible task states. IMPORTANT: Mesos assumes tasks that
-// enter terminal states (see below) imply the task is no longer
-// running and thus clean up any thing associated with the task
-// (ultimately offering any resources being consumed by that task to
-// another task).
 type TaskState int32
 
 const (
@@ -133,6 +93,9 @@ func (x TaskState) Enum() *TaskState {
 }
 func (x TaskState) String() string {
 	return proto.EnumName(TaskState_name, int32(x))
+}
+func (x TaskState) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
 }
 func (x *TaskState) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(TaskState_value, data, "TaskState")
@@ -173,6 +136,9 @@ func (x Value_Type) Enum() *Value_Type {
 func (x Value_Type) String() string {
 	return proto.EnumName(Value_Type_name, int32(x))
 }
+func (x Value_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Value_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Value_Type_value, data, "Value_Type")
 	if err != nil {
@@ -209,6 +175,9 @@ func (x ACL_Entity_Type) Enum() *ACL_Entity_Type {
 func (x ACL_Entity_Type) String() string {
 	return proto.EnumName(ACL_Entity_Type_name, int32(x))
 }
+func (x ACL_Entity_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *ACL_Entity_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(ACL_Entity_Type_value, data, "ACL_Entity_Type")
 	if err != nil {
@@ -218,9 +187,111 @@ func (x *ACL_Entity_Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// *
-// A unique ID assigned to a framework. A framework can reuse this ID
-// in order to do failover (see MesosSchedulerDriver).
+type Volume_Mode int32
+
+const (
+	Volume_RW Volume_Mode = 1
+	Volume_RO Volume_Mode = 2
+)
+
+var Volume_Mode_name = map[int32]string{
+	1: "RW",
+	2: "RO",
+}
+var Volume_Mode_value = map[string]int32{
+	"RW": 1,
+	"RO": 2,
+}
+
+func (x Volume_Mode) Enum() *Volume_Mode {
+	p := new(Volume_Mode)
+	*p = x
+	return p
+}
+func (x Volume_Mode) String() string {
+	return proto.EnumName(Volume_Mode_name, int32(x))
+}
+func (x Volume_Mode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
+func (x *Volume_Mode) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(Volume_Mode_value, data, "Volume_Mode")
+	if err != nil {
+		return err
+	}
+	*x = Volume_Mode(value)
+	return nil
+}
+
+type ContainerInfo_Type int32
+
+const (
+	ContainerInfo_DOCKER ContainerInfo_Type = 1
+)
+
+var ContainerInfo_Type_name = map[int32]string{
+	1: "DOCKER",
+}
+var ContainerInfo_Type_value = map[string]int32{
+	"DOCKER": 1,
+}
+
+func (x ContainerInfo_Type) Enum() *ContainerInfo_Type {
+	p := new(ContainerInfo_Type)
+	*p = x
+	return p
+}
+func (x ContainerInfo_Type) String() string {
+	return proto.EnumName(ContainerInfo_Type_name, int32(x))
+}
+func (x ContainerInfo_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
+func (x *ContainerInfo_Type) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(ContainerInfo_Type_value, data, "ContainerInfo_Type")
+	if err != nil {
+		return err
+	}
+	*x = ContainerInfo_Type(value)
+	return nil
+}
+
+type ContainerInfo_DockerInfo_Network int32
+
+const (
+	ContainerInfo_DockerInfo_HOST   ContainerInfo_DockerInfo_Network = 1
+	ContainerInfo_DockerInfo_BRIDGE ContainerInfo_DockerInfo_Network = 2
+)
+
+var ContainerInfo_DockerInfo_Network_name = map[int32]string{
+	1: "HOST",
+	2: "BRIDGE",
+}
+var ContainerInfo_DockerInfo_Network_value = map[string]int32{
+	"HOST":   1,
+	"BRIDGE": 2,
+}
+
+func (x ContainerInfo_DockerInfo_Network) Enum() *ContainerInfo_DockerInfo_Network {
+	p := new(ContainerInfo_DockerInfo_Network)
+	*p = x
+	return p
+}
+func (x ContainerInfo_DockerInfo_Network) String() string {
+	return proto.EnumName(ContainerInfo_DockerInfo_Network_name, int32(x))
+}
+func (x ContainerInfo_DockerInfo_Network) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
+func (x *ContainerInfo_DockerInfo_Network) UnmarshalJSON(data []byte) error {
+	value, err := proto.UnmarshalJSONEnum(ContainerInfo_DockerInfo_Network_value, data, "ContainerInfo_DockerInfo_Network")
+	if err != nil {
+		return err
+	}
+	*x = ContainerInfo_DockerInfo_Network(value)
+	return nil
+}
+
 type FrameworkID struct {
 	Value            *string `protobuf:"bytes,1,req,name=value" json:"value,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -237,8 +308,6 @@ func (m *FrameworkID) GetValue() string {
 	return ""
 }
 
-// *
-// A unique ID assigned to an offer.
 type OfferID struct {
 	Value            *string `protobuf:"bytes,1,req,name=value" json:"value,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -255,10 +324,6 @@ func (m *OfferID) GetValue() string {
 	return ""
 }
 
-// *
-// A unique ID assigned to a slave. Currently, a slave gets a new ID
-// whenever it (re)registers with Mesos. Framework writers shouldn't
-// assume any binding between a slave ID and and a hostname.
 type SlaveID struct {
 	Value            *string `protobuf:"bytes,1,req,name=value" json:"value,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -275,11 +340,6 @@ func (m *SlaveID) GetValue() string {
 	return ""
 }
 
-// *
-// A framework generated ID to distinguish a task. The ID must remain
-// unique while the task is active. However, a framework can reuse an
-// ID _only_ if a previous task with the same ID has reached a
-// terminal state (e.g., TASK_FINISHED, TASK_LOST, TASK_KILLED, etc.).
 type TaskID struct {
 	Value            *string `protobuf:"bytes,1,req,name=value" json:"value,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -296,10 +356,6 @@ func (m *TaskID) GetValue() string {
 	return ""
 }
 
-// *
-// A framework generated ID to distinguish an executor. Only one
-// executor with the same ID can be active on the same slave at a
-// time.
 type ExecutorID struct {
 	Value            *string `protobuf:"bytes,1,req,name=value" json:"value,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -316,11 +372,6 @@ func (m *ExecutorID) GetValue() string {
 	return ""
 }
 
-// *
-// A slave generated ID to distinguish a container. The ID must be unique
-// between any active or completed containers on the slave. In particular,
-// containers for different runs of the same (framework, executor) pair must be
-// unique.
 type ContainerID struct {
 	Value            *string `protobuf:"bytes,1,req,name=value" json:"value,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -337,28 +388,6 @@ func (m *ContainerID) GetValue() string {
 	return ""
 }
 
-// *
-// Describes a framework. The user field is used to determine the
-// Unix user that an executor/task should be launched as. If the user
-// field is set to an empty string Mesos will automagically set it
-// to the current user. Note that the ID is only available after a
-// framework has registered, however, it is included here in order to
-// facilitate scheduler failover (i.e., if it is set then the
-// MesosSchedulerDriver expects the scheduler is performing failover).
-// The amount of time that the master will wait for the scheduler to
-// failover before removing the framework is specified by
-// failover_timeout. If checkpoint is set, framework pid, executor
-// pids and status updates are checkpointed to disk by the slaves.
-// Checkpointing allows a restarted slave to reconnect with old
-// executors and recover status updates, at the cost of disk I/O.
-// The role field is used to group frameworks for allocation
-// decisions, depending on the allocation policy being used.
-// If the hostname field is set to an empty string Mesos will
-// automagically set it to the current hostname.
-// The principal field should match the credential the framework uses
-// in authentication. This field is used for framework API rate
-// exporting and limiting and should be set even if authentication is
-// not enabled if these features are desired.
 type FrameworkInfo struct {
 	User             *string      `protobuf:"bytes,1,req,name=user" json:"user,omitempty"`
 	Name             *string      `protobuf:"bytes,2,req,name=name" json:"name,omitempty"`
@@ -435,22 +464,15 @@ func (m *FrameworkInfo) GetPrincipal() string {
 	return ""
 }
 
-// *
-// Describes a health check for a task or executor (or any arbitrary
-// process/command). A "strategy" is picked by specifying one of the
-// optional fields, currently only 'http' is supported. Specifying
-// more than one strategy is an error.
 type HealthCheck struct {
-	Http *HealthCheck_HTTP `protobuf:"bytes,1,opt,name=http" json:"http,omitempty"`
-	// Amount of time to wait until starting the health checks.
-	DelaySeconds *float64 `protobuf:"fixed64,2,opt,name=delay_seconds,def=15" json:"delay_seconds,omitempty"`
-	// Interval between health checks.
-	IntervalSeconds *float64 `protobuf:"fixed64,3,opt,name=interval_seconds,def=10" json:"interval_seconds,omitempty"`
-	// Amount of time to wait for the health check to complete.
-	TimeoutSeconds *float64 `protobuf:"fixed64,4,opt,name=timeout_seconds,def=20" json:"timeout_seconds,omitempty"`
-	// Number of consecutive failures until considered unhealthy.
-	Failures         *uint32 `protobuf:"varint,5,opt,name=failures,def=3" json:"failures,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	Http                *HealthCheck_HTTP `protobuf:"bytes,1,opt,name=http" json:"http,omitempty"`
+	DelaySeconds        *float64          `protobuf:"fixed64,2,opt,name=delay_seconds,def=15" json:"delay_seconds,omitempty"`
+	IntervalSeconds     *float64          `protobuf:"fixed64,3,opt,name=interval_seconds,def=10" json:"interval_seconds,omitempty"`
+	TimeoutSeconds      *float64          `protobuf:"fixed64,4,opt,name=timeout_seconds,def=20" json:"timeout_seconds,omitempty"`
+	ConsecutiveFailures *uint32           `protobuf:"varint,5,opt,name=consecutive_failures,def=3" json:"consecutive_failures,omitempty"`
+	GracePeriodSeconds  *float64          `protobuf:"fixed64,6,opt,name=grace_period_seconds,def=10" json:"grace_period_seconds,omitempty"`
+	Command             *CommandInfo      `protobuf:"bytes,7,opt,name=command" json:"command,omitempty"`
+	XXX_unrecognized    []byte            `json:"-"`
 }
 
 func (m *HealthCheck) Reset()         { *m = HealthCheck{} }
@@ -460,7 +482,8 @@ func (*HealthCheck) ProtoMessage()    {}
 const Default_HealthCheck_DelaySeconds float64 = 15
 const Default_HealthCheck_IntervalSeconds float64 = 10
 const Default_HealthCheck_TimeoutSeconds float64 = 20
-const Default_HealthCheck_Failures uint32 = 3
+const Default_HealthCheck_ConsecutiveFailures uint32 = 3
+const Default_HealthCheck_GracePeriodSeconds float64 = 10
 
 func (m *HealthCheck) GetHttp() *HealthCheck_HTTP {
 	if m != nil {
@@ -490,21 +513,30 @@ func (m *HealthCheck) GetTimeoutSeconds() float64 {
 	return Default_HealthCheck_TimeoutSeconds
 }
 
-func (m *HealthCheck) GetFailures() uint32 {
-	if m != nil && m.Failures != nil {
-		return *m.Failures
+func (m *HealthCheck) GetConsecutiveFailures() uint32 {
+	if m != nil && m.ConsecutiveFailures != nil {
+		return *m.ConsecutiveFailures
 	}
-	return Default_HealthCheck_Failures
+	return Default_HealthCheck_ConsecutiveFailures
 }
 
-// Describes an HTTP health check.
+func (m *HealthCheck) GetGracePeriodSeconds() float64 {
+	if m != nil && m.GracePeriodSeconds != nil {
+		return *m.GracePeriodSeconds
+	}
+	return Default_HealthCheck_GracePeriodSeconds
+}
+
+func (m *HealthCheck) GetCommand() *CommandInfo {
+	if m != nil {
+		return m.Command
+	}
+	return nil
+}
+
 type HealthCheck_HTTP struct {
-	// Port to send the HTTP request.
-	Port *uint32 `protobuf:"varint,1,req,name=port" json:"port,omitempty"`
-	// HTTP request path.
-	Path *string `protobuf:"bytes,2,opt,name=path,def=/" json:"path,omitempty"`
-	// Expected response statuses. Not specifying any statuses implies
-	// that any returned status is acceptable.
+	Port             *uint32  `protobuf:"varint,1,req,name=port" json:"port,omitempty"`
+	Path             *string  `protobuf:"bytes,2,opt,name=path,def=/" json:"path,omitempty"`
 	Statuses         []uint32 `protobuf:"varint,4,rep,name=statuses" json:"statuses,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
@@ -536,36 +568,22 @@ func (m *HealthCheck_HTTP) GetStatuses() []uint32 {
 	return nil
 }
 
-// *
-// Describes a command, executed via: '/bin/sh -c value'. Any URIs specified
-// are fetched before executing the command.  If the executable field for an
-// uri is set, executable file permission is set on the downloaded file.
-// Otherwise, if the downloaded file has a recognized archive extension
-// (currently [compressed] tar and zip) it is extracted into the executor's
-// working directory. This extraction can be disabled by setting `extract` to
-// false. In addition, any environment variables are set before executing
-// the command (so they can be used to "parameterize" your command).
 type CommandInfo struct {
-	// NOTE: MesosContainerizer does currently not support this
-	// attribute and tasks supplying a 'container' will fail.
-	Container   *CommandInfo_ContainerInfo `protobuf:"bytes,4,opt,name=container" json:"container,omitempty"`
-	Uris        []*CommandInfo_URI         `protobuf:"bytes,1,rep,name=uris" json:"uris,omitempty"`
-	Environment *Environment               `protobuf:"bytes,2,opt,name=environment" json:"environment,omitempty"`
-	// Actual command (i.e., 'echo hello world').
-	Value *string `protobuf:"bytes,3,req,name=value" json:"value,omitempty"`
-	// Enables executor and tasks to run as a specific user. If the user
-	// field is present both in FrameworkInfo and here, the CommandInfo
-	// user value takes precedence.
-	User *string `protobuf:"bytes,5,opt,name=user" json:"user,omitempty"`
-	// A health check for the command (currently in *alpha* and initial
-	// support will only be for TaskInfo's that have a CommandInfo).
-	HealthCheck      *HealthCheck `protobuf:"bytes,6,opt,name=health_check" json:"health_check,omitempty"`
-	XXX_unrecognized []byte       `json:"-"`
+	Container        *CommandInfo_ContainerInfo `protobuf:"bytes,4,opt,name=container" json:"container,omitempty"`
+	Uris             []*CommandInfo_URI         `protobuf:"bytes,1,rep,name=uris" json:"uris,omitempty"`
+	Environment      *Environment               `protobuf:"bytes,2,opt,name=environment" json:"environment,omitempty"`
+	Shell            *bool                      `protobuf:"varint,6,opt,name=shell,def=1" json:"shell,omitempty"`
+	Value            *string                    `protobuf:"bytes,3,opt,name=value" json:"value,omitempty"`
+	Arguments        []string                   `protobuf:"bytes,7,rep,name=arguments" json:"arguments,omitempty"`
+	User             *string                    `protobuf:"bytes,5,opt,name=user" json:"user,omitempty"`
+	XXX_unrecognized []byte                     `json:"-"`
 }
 
 func (m *CommandInfo) Reset()         { *m = CommandInfo{} }
 func (m *CommandInfo) String() string { return proto.CompactTextString(m) }
 func (*CommandInfo) ProtoMessage()    {}
+
+const Default_CommandInfo_Shell bool = true
 
 func (m *CommandInfo) GetContainer() *CommandInfo_ContainerInfo {
 	if m != nil {
@@ -588,6 +606,13 @@ func (m *CommandInfo) GetEnvironment() *Environment {
 	return nil
 }
 
+func (m *CommandInfo) GetShell() bool {
+	if m != nil && m.Shell != nil {
+		return *m.Shell
+	}
+	return Default_CommandInfo_Shell
+}
+
 func (m *CommandInfo) GetValue() string {
 	if m != nil && m.Value != nil {
 		return *m.Value
@@ -595,18 +620,18 @@ func (m *CommandInfo) GetValue() string {
 	return ""
 }
 
+func (m *CommandInfo) GetArguments() []string {
+	if m != nil {
+		return m.Arguments
+	}
+	return nil
+}
+
 func (m *CommandInfo) GetUser() string {
 	if m != nil && m.User != nil {
 		return *m.User
 	}
 	return ""
-}
-
-func (m *CommandInfo) GetHealthCheck() *HealthCheck {
-	if m != nil {
-		return m.HealthCheck
-	}
-	return nil
 }
 
 type CommandInfo_URI struct {
@@ -643,19 +668,8 @@ func (m *CommandInfo_URI) GetExtract() bool {
 	return Default_CommandInfo_URI_Extract
 }
 
-// Describes a container.
-// Not all containerizers currently implement ContainerInfo, so it
-// is possible that a launched task will fail due to supplying this
-// attribute.
-// NOTE: The containerizer API is currently in an early beta or
-// even alpha state. Some details, like the exact semantics of an
-// "image" or "options" are not yet hardened.
-// TODO(tillt): Describe the exact scheme and semantics of "image"
-// and "options".
 type CommandInfo_ContainerInfo struct {
-	// URI describing the container image name.
-	Image *string `protobuf:"bytes,1,req,name=image" json:"image,omitempty"`
-	// Describes additional options passed to the containerizer.
+	Image            *string  `protobuf:"bytes,1,req,name=image" json:"image,omitempty"`
 	Options          []string `protobuf:"bytes,2,rep,name=options" json:"options,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
@@ -678,24 +692,16 @@ func (m *CommandInfo_ContainerInfo) GetOptions() []string {
 	return nil
 }
 
-// *
-// Describes information about an executor. The 'data' field can be
-// used to pass arbitrary bytes to an executor.
 type ExecutorInfo struct {
-	ExecutorId  *ExecutorID  `protobuf:"bytes,1,req,name=executor_id" json:"executor_id,omitempty"`
-	FrameworkId *FrameworkID `protobuf:"bytes,8,opt,name=framework_id" json:"framework_id,omitempty"`
-	Command     *CommandInfo `protobuf:"bytes,7,req,name=command" json:"command,omitempty"`
-	Resources   []*Resource  `protobuf:"bytes,5,rep,name=resources" json:"resources,omitempty"`
-	Name        *string      `protobuf:"bytes,9,opt,name=name" json:"name,omitempty"`
-	// Source is an identifier style string used by frameworks to track
-	// the source of an executor. This is useful when it's possible for
-	// different executor ids to be related semantically.
-	// NOTE: Source is exposed alongside the resource usage of the
-	// executor via JSON on the slave. This allows users to import
-	// usage information into a time series database for monitoring.
-	Source           *string `protobuf:"bytes,10,opt,name=source" json:"source,omitempty"`
-	Data             []byte  `protobuf:"bytes,4,opt,name=data" json:"data,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	ExecutorId       *ExecutorID    `protobuf:"bytes,1,req,name=executor_id" json:"executor_id,omitempty"`
+	FrameworkId      *FrameworkID   `protobuf:"bytes,8,opt,name=framework_id" json:"framework_id,omitempty"`
+	Command          *CommandInfo   `protobuf:"bytes,7,req,name=command" json:"command,omitempty"`
+	Container        *ContainerInfo `protobuf:"bytes,11,opt,name=container" json:"container,omitempty"`
+	Resources        []*Resource    `protobuf:"bytes,5,rep,name=resources" json:"resources,omitempty"`
+	Name             *string        `protobuf:"bytes,9,opt,name=name" json:"name,omitempty"`
+	Source           *string        `protobuf:"bytes,10,opt,name=source" json:"source,omitempty"`
+	Data             []byte         `protobuf:"bytes,4,opt,name=data" json:"data,omitempty"`
+	XXX_unrecognized []byte         `json:"-"`
 }
 
 func (m *ExecutorInfo) Reset()         { *m = ExecutorInfo{} }
@@ -719,6 +725,13 @@ func (m *ExecutorInfo) GetFrameworkId() *FrameworkID {
 func (m *ExecutorInfo) GetCommand() *CommandInfo {
 	if m != nil {
 		return m.Command
+	}
+	return nil
+}
+
+func (m *ExecutorInfo) GetContainer() *ContainerInfo {
+	if m != nil {
+		return m.Container
 	}
 	return nil
 }
@@ -751,10 +764,6 @@ func (m *ExecutorInfo) GetData() []byte {
 	return nil
 }
 
-// *
-// Describes a master. This will probably have more fields in the
-// future which might be used, for example, to link a framework webui
-// to a master webui.
 type MasterInfo struct {
 	Id               *string `protobuf:"bytes,1,req,name=id" json:"id,omitempty"`
 	Ip               *uint32 `protobuf:"varint,2,req,name=ip" json:"ip,omitempty"`
@@ -805,23 +814,16 @@ func (m *MasterInfo) GetHostname() string {
 	return ""
 }
 
-// *
-// Describes a slave. Note that the 'id' field is only available after
-// a slave is registered with the master, and is made available here
-// to facilitate re-registration.  If checkpoint is set, the slave is
-// checkpointing its own information and potentially frameworks'
-// information (if a framework has checkpointing enabled).
 type SlaveInfo struct {
-	Hostname   *string      `protobuf:"bytes,1,req,name=hostname" json:"hostname,omitempty"`
-	Port       *int32       `protobuf:"varint,8,opt,name=port,def=5051" json:"port,omitempty"`
-	Resources  []*Resource  `protobuf:"bytes,3,rep,name=resources" json:"resources,omitempty"`
-	Attributes []*Attribute `protobuf:"bytes,5,rep,name=attributes" json:"attributes,omitempty"`
-	Id         *SlaveID     `protobuf:"bytes,6,opt,name=id" json:"id,omitempty"`
-	Checkpoint *bool        `protobuf:"varint,7,opt,name=checkpoint,def=0" json:"checkpoint,omitempty"`
-	// Deprecated!
-	WebuiHostname    *string `protobuf:"bytes,2,opt,name=webui_hostname" json:"webui_hostname,omitempty"`
-	WebuiPort        *int32  `protobuf:"varint,4,opt,name=webui_port,def=8081" json:"webui_port,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	Hostname         *string      `protobuf:"bytes,1,req,name=hostname" json:"hostname,omitempty"`
+	Port             *int32       `protobuf:"varint,8,opt,name=port,def=5051" json:"port,omitempty"`
+	Resources        []*Resource  `protobuf:"bytes,3,rep,name=resources" json:"resources,omitempty"`
+	Attributes       []*Attribute `protobuf:"bytes,5,rep,name=attributes" json:"attributes,omitempty"`
+	Id               *SlaveID     `protobuf:"bytes,6,opt,name=id" json:"id,omitempty"`
+	Checkpoint       *bool        `protobuf:"varint,7,opt,name=checkpoint,def=0" json:"checkpoint,omitempty"`
+	WebuiHostname    *string      `protobuf:"bytes,2,opt,name=webui_hostname" json:"webui_hostname,omitempty"`
+	WebuiPort        *int32       `protobuf:"varint,4,opt,name=webui_port,def=8081" json:"webui_port,omitempty"`
+	XXX_unrecognized []byte       `json:"-"`
 }
 
 func (m *SlaveInfo) Reset()         { *m = SlaveInfo{} }
@@ -888,9 +890,6 @@ func (m *SlaveInfo) GetWebuiPort() int32 {
 	return Default_SlaveInfo_WebuiPort
 }
 
-// *
-// Describes an Attribute or Resource "value". A value is described
-// using the standard protocol buffer "union" trick.
 type Value struct {
 	Type             *Value_Type   `protobuf:"varint,1,req,name=type,enum=mesos.Value_Type" json:"type,omitempty"`
 	Scalar           *Value_Scalar `protobuf:"bytes,2,opt,name=scalar" json:"scalar,omitempty"`
@@ -908,7 +907,7 @@ func (m *Value) GetType() Value_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Value_SCALAR
+	return 0
 }
 
 func (m *Value) GetScalar() *Value_Scalar {
@@ -1027,10 +1026,6 @@ func (m *Value_Text) GetValue() string {
 	return ""
 }
 
-// *
-// Describes an attribute that can be set on a machine. For now,
-// attributes and resources share the same "value" type, but this may
-// change in the future and attributes may only be string based.
 type Attribute struct {
 	Name             *string       `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
 	Type             *Value_Type   `protobuf:"varint,2,req,name=type,enum=mesos.Value_Type" json:"type,omitempty"`
@@ -1056,7 +1051,7 @@ func (m *Attribute) GetType() Value_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Value_SCALAR
+	return 0
 }
 
 func (m *Attribute) GetScalar() *Value_Scalar {
@@ -1087,14 +1082,6 @@ func (m *Attribute) GetText() *Value_Text {
 	return nil
 }
 
-// *
-// Describes a resource on a machine. A resource can take on one of
-// three types: scalar (double), a list of finite and discrete ranges
-// (e.g., [1-10, 20-30]), or a set of items. A resource is described
-// using the standard protocol buffer "union" trick.
-//
-// TODO(benh): Add better support for "expected" resources (e.g.,
-// cpus, memory, disk, network).
 type Resource struct {
 	Name             *string       `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
 	Type             *Value_Type   `protobuf:"varint,2,req,name=type,enum=mesos.Value_Type" json:"type,omitempty"`
@@ -1122,7 +1109,7 @@ func (m *Resource) GetType() Value_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Value_SCALAR
+	return 0
 }
 
 func (m *Resource) GetScalar() *Value_Scalar {
@@ -1153,29 +1140,29 @@ func (m *Resource) GetRole() string {
 	return Default_Resource_Role
 }
 
-//
-// A snapshot of resource usage statistics.
 type ResourceStatistics struct {
-	Timestamp *float64 `protobuf:"fixed64,1,req,name=timestamp" json:"timestamp,omitempty"`
-	// CPU Usage Information:
-	// Total CPU time spent in user mode, and kernel mode.
-	CpusUserTimeSecs   *float64 `protobuf:"fixed64,2,opt,name=cpus_user_time_secs" json:"cpus_user_time_secs,omitempty"`
-	CpusSystemTimeSecs *float64 `protobuf:"fixed64,3,opt,name=cpus_system_time_secs" json:"cpus_system_time_secs,omitempty"`
-	// Number of CPUs allocated.
-	CpusLimit *float64 `protobuf:"fixed64,4,opt,name=cpus_limit" json:"cpus_limit,omitempty"`
-	// cpu.stat on process throttling (for contention issues).
-	CpusNrPeriods         *uint32  `protobuf:"varint,7,opt,name=cpus_nr_periods" json:"cpus_nr_periods,omitempty"`
-	CpusNrThrottled       *uint32  `protobuf:"varint,8,opt,name=cpus_nr_throttled" json:"cpus_nr_throttled,omitempty"`
-	CpusThrottledTimeSecs *float64 `protobuf:"fixed64,9,opt,name=cpus_throttled_time_secs" json:"cpus_throttled_time_secs,omitempty"`
-	// Memory Usage Information:
-	MemRssBytes *uint64 `protobuf:"varint,5,opt,name=mem_rss_bytes" json:"mem_rss_bytes,omitempty"`
-	// Amount of memory resources allocated.
-	MemLimitBytes *uint64 `protobuf:"varint,6,opt,name=mem_limit_bytes" json:"mem_limit_bytes,omitempty"`
-	// Broken out memory usage information (files, anonymous, and mmaped files)
-	MemFileBytes       *uint64 `protobuf:"varint,10,opt,name=mem_file_bytes" json:"mem_file_bytes,omitempty"`
-	MemAnonBytes       *uint64 `protobuf:"varint,11,opt,name=mem_anon_bytes" json:"mem_anon_bytes,omitempty"`
-	MemMappedFileBytes *uint64 `protobuf:"varint,12,opt,name=mem_mapped_file_bytes" json:"mem_mapped_file_bytes,omitempty"`
-	XXX_unrecognized   []byte  `json:"-"`
+	Timestamp             *float64        `protobuf:"fixed64,1,req,name=timestamp" json:"timestamp,omitempty"`
+	CpusUserTimeSecs      *float64        `protobuf:"fixed64,2,opt,name=cpus_user_time_secs" json:"cpus_user_time_secs,omitempty"`
+	CpusSystemTimeSecs    *float64        `protobuf:"fixed64,3,opt,name=cpus_system_time_secs" json:"cpus_system_time_secs,omitempty"`
+	CpusLimit             *float64        `protobuf:"fixed64,4,opt,name=cpus_limit" json:"cpus_limit,omitempty"`
+	CpusNrPeriods         *uint32         `protobuf:"varint,7,opt,name=cpus_nr_periods" json:"cpus_nr_periods,omitempty"`
+	CpusNrThrottled       *uint32         `protobuf:"varint,8,opt,name=cpus_nr_throttled" json:"cpus_nr_throttled,omitempty"`
+	CpusThrottledTimeSecs *float64        `protobuf:"fixed64,9,opt,name=cpus_throttled_time_secs" json:"cpus_throttled_time_secs,omitempty"`
+	MemRssBytes           *uint64         `protobuf:"varint,5,opt,name=mem_rss_bytes" json:"mem_rss_bytes,omitempty"`
+	MemLimitBytes         *uint64         `protobuf:"varint,6,opt,name=mem_limit_bytes" json:"mem_limit_bytes,omitempty"`
+	MemFileBytes          *uint64         `protobuf:"varint,10,opt,name=mem_file_bytes" json:"mem_file_bytes,omitempty"`
+	MemAnonBytes          *uint64         `protobuf:"varint,11,opt,name=mem_anon_bytes" json:"mem_anon_bytes,omitempty"`
+	MemMappedFileBytes    *uint64         `protobuf:"varint,12,opt,name=mem_mapped_file_bytes" json:"mem_mapped_file_bytes,omitempty"`
+	Perf                  *PerfStatistics `protobuf:"bytes,13,opt,name=perf" json:"perf,omitempty"`
+	NetRxPackets          *uint64         `protobuf:"varint,14,opt,name=net_rx_packets" json:"net_rx_packets,omitempty"`
+	NetRxBytes            *uint64         `protobuf:"varint,15,opt,name=net_rx_bytes" json:"net_rx_bytes,omitempty"`
+	NetRxErrors           *uint64         `protobuf:"varint,16,opt,name=net_rx_errors" json:"net_rx_errors,omitempty"`
+	NetRxDropped          *uint64         `protobuf:"varint,17,opt,name=net_rx_dropped" json:"net_rx_dropped,omitempty"`
+	NetTxPackets          *uint64         `protobuf:"varint,18,opt,name=net_tx_packets" json:"net_tx_packets,omitempty"`
+	NetTxBytes            *uint64         `protobuf:"varint,19,opt,name=net_tx_bytes" json:"net_tx_bytes,omitempty"`
+	NetTxErrors           *uint64         `protobuf:"varint,20,opt,name=net_tx_errors" json:"net_tx_errors,omitempty"`
+	NetTxDropped          *uint64         `protobuf:"varint,21,opt,name=net_tx_dropped" json:"net_tx_dropped,omitempty"`
+	XXX_unrecognized      []byte          `json:"-"`
 }
 
 func (m *ResourceStatistics) Reset()         { *m = ResourceStatistics{} }
@@ -1266,20 +1253,75 @@ func (m *ResourceStatistics) GetMemMappedFileBytes() uint64 {
 	return 0
 }
 
-// *
-// Describes a snapshot of the resource usage for an executor.
-//
-// TODO(bmahler): Note that we want to be sending this information
-// to the master, and subsequently to the relevant scheduler. So
-// this proto is designed to be easy for the scheduler to use, this
-// is why we provide the slave id, executor info / task info.
+func (m *ResourceStatistics) GetPerf() *PerfStatistics {
+	if m != nil {
+		return m.Perf
+	}
+	return nil
+}
+
+func (m *ResourceStatistics) GetNetRxPackets() uint64 {
+	if m != nil && m.NetRxPackets != nil {
+		return *m.NetRxPackets
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetRxBytes() uint64 {
+	if m != nil && m.NetRxBytes != nil {
+		return *m.NetRxBytes
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetRxErrors() uint64 {
+	if m != nil && m.NetRxErrors != nil {
+		return *m.NetRxErrors
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetRxDropped() uint64 {
+	if m != nil && m.NetRxDropped != nil {
+		return *m.NetRxDropped
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetTxPackets() uint64 {
+	if m != nil && m.NetTxPackets != nil {
+		return *m.NetTxPackets
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetTxBytes() uint64 {
+	if m != nil && m.NetTxBytes != nil {
+		return *m.NetTxBytes
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetTxErrors() uint64 {
+	if m != nil && m.NetTxErrors != nil {
+		return *m.NetTxErrors
+	}
+	return 0
+}
+
+func (m *ResourceStatistics) GetNetTxDropped() uint64 {
+	if m != nil && m.NetTxDropped != nil {
+		return *m.NetTxDropped
+	}
+	return 0
+}
+
 type ResourceUsage struct {
-	SlaveId      *SlaveID     `protobuf:"bytes,1,req,name=slave_id" json:"slave_id,omitempty"`
-	FrameworkId  *FrameworkID `protobuf:"bytes,2,req,name=framework_id" json:"framework_id,omitempty"`
-	ExecutorId   *ExecutorID  `protobuf:"bytes,3,opt,name=executor_id" json:"executor_id,omitempty"`
-	ExecutorName *string      `protobuf:"bytes,4,opt,name=executor_name" json:"executor_name,omitempty"`
-	TaskId       *TaskID      `protobuf:"bytes,5,opt,name=task_id" json:"task_id,omitempty"`
-	// If missing, the isolation module cannot provide resource usage.
+	SlaveId          *SlaveID            `protobuf:"bytes,1,req,name=slave_id" json:"slave_id,omitempty"`
+	FrameworkId      *FrameworkID        `protobuf:"bytes,2,req,name=framework_id" json:"framework_id,omitempty"`
+	ExecutorId       *ExecutorID         `protobuf:"bytes,3,opt,name=executor_id" json:"executor_id,omitempty"`
+	ExecutorName     *string             `protobuf:"bytes,4,opt,name=executor_name" json:"executor_name,omitempty"`
+	TaskId           *TaskID             `protobuf:"bytes,5,opt,name=task_id" json:"task_id,omitempty"`
 	Statistics       *ResourceStatistics `protobuf:"bytes,6,opt,name=statistics" json:"statistics,omitempty"`
 	XXX_unrecognized []byte              `json:"-"`
 }
@@ -1330,11 +1372,438 @@ func (m *ResourceUsage) GetStatistics() *ResourceStatistics {
 	return nil
 }
 
-// *
-// Describes a request for resources that can be used by a framework
-// to proactively influence the allocator.  If 'slave_id' is provided
-// then this request is assumed to only apply to resources on that
-// slave.
+type PerfStatistics struct {
+	Timestamp              *float64 `protobuf:"fixed64,1,req,name=timestamp" json:"timestamp,omitempty"`
+	Duration               *float64 `protobuf:"fixed64,2,req,name=duration" json:"duration,omitempty"`
+	Cycles                 *uint64  `protobuf:"varint,3,opt,name=cycles" json:"cycles,omitempty"`
+	StalledCyclesFrontend  *uint64  `protobuf:"varint,4,opt,name=stalled_cycles_frontend" json:"stalled_cycles_frontend,omitempty"`
+	StalledCyclesBackend   *uint64  `protobuf:"varint,5,opt,name=stalled_cycles_backend" json:"stalled_cycles_backend,omitempty"`
+	Instructions           *uint64  `protobuf:"varint,6,opt,name=instructions" json:"instructions,omitempty"`
+	CacheReferences        *uint64  `protobuf:"varint,7,opt,name=cache_references" json:"cache_references,omitempty"`
+	CacheMisses            *uint64  `protobuf:"varint,8,opt,name=cache_misses" json:"cache_misses,omitempty"`
+	Branches               *uint64  `protobuf:"varint,9,opt,name=branches" json:"branches,omitempty"`
+	BranchMisses           *uint64  `protobuf:"varint,10,opt,name=branch_misses" json:"branch_misses,omitempty"`
+	BusCycles              *uint64  `protobuf:"varint,11,opt,name=bus_cycles" json:"bus_cycles,omitempty"`
+	RefCycles              *uint64  `protobuf:"varint,12,opt,name=ref_cycles" json:"ref_cycles,omitempty"`
+	CpuClock               *float64 `protobuf:"fixed64,13,opt,name=cpu_clock" json:"cpu_clock,omitempty"`
+	TaskClock              *float64 `protobuf:"fixed64,14,opt,name=task_clock" json:"task_clock,omitempty"`
+	PageFaults             *uint64  `protobuf:"varint,15,opt,name=page_faults" json:"page_faults,omitempty"`
+	MinorFaults            *uint64  `protobuf:"varint,16,opt,name=minor_faults" json:"minor_faults,omitempty"`
+	MajorFaults            *uint64  `protobuf:"varint,17,opt,name=major_faults" json:"major_faults,omitempty"`
+	ContextSwitches        *uint64  `protobuf:"varint,18,opt,name=context_switches" json:"context_switches,omitempty"`
+	CpuMigrations          *uint64  `protobuf:"varint,19,opt,name=cpu_migrations" json:"cpu_migrations,omitempty"`
+	AlignmentFaults        *uint64  `protobuf:"varint,20,opt,name=alignment_faults" json:"alignment_faults,omitempty"`
+	EmulationFaults        *uint64  `protobuf:"varint,21,opt,name=emulation_faults" json:"emulation_faults,omitempty"`
+	L1DcacheLoads          *uint64  `protobuf:"varint,22,opt,name=l1_dcache_loads" json:"l1_dcache_loads,omitempty"`
+	L1DcacheLoadMisses     *uint64  `protobuf:"varint,23,opt,name=l1_dcache_load_misses" json:"l1_dcache_load_misses,omitempty"`
+	L1DcacheStores         *uint64  `protobuf:"varint,24,opt,name=l1_dcache_stores" json:"l1_dcache_stores,omitempty"`
+	L1DcacheStoreMisses    *uint64  `protobuf:"varint,25,opt,name=l1_dcache_store_misses" json:"l1_dcache_store_misses,omitempty"`
+	L1DcachePrefetches     *uint64  `protobuf:"varint,26,opt,name=l1_dcache_prefetches" json:"l1_dcache_prefetches,omitempty"`
+	L1DcachePrefetchMisses *uint64  `protobuf:"varint,27,opt,name=l1_dcache_prefetch_misses" json:"l1_dcache_prefetch_misses,omitempty"`
+	L1IcacheLoads          *uint64  `protobuf:"varint,28,opt,name=l1_icache_loads" json:"l1_icache_loads,omitempty"`
+	L1IcacheLoadMisses     *uint64  `protobuf:"varint,29,opt,name=l1_icache_load_misses" json:"l1_icache_load_misses,omitempty"`
+	L1IcachePrefetches     *uint64  `protobuf:"varint,30,opt,name=l1_icache_prefetches" json:"l1_icache_prefetches,omitempty"`
+	L1IcachePrefetchMisses *uint64  `protobuf:"varint,31,opt,name=l1_icache_prefetch_misses" json:"l1_icache_prefetch_misses,omitempty"`
+	LlcLoads               *uint64  `protobuf:"varint,32,opt,name=llc_loads" json:"llc_loads,omitempty"`
+	LlcLoadMisses          *uint64  `protobuf:"varint,33,opt,name=llc_load_misses" json:"llc_load_misses,omitempty"`
+	LlcStores              *uint64  `protobuf:"varint,34,opt,name=llc_stores" json:"llc_stores,omitempty"`
+	LlcStoreMisses         *uint64  `protobuf:"varint,35,opt,name=llc_store_misses" json:"llc_store_misses,omitempty"`
+	LlcPrefetches          *uint64  `protobuf:"varint,36,opt,name=llc_prefetches" json:"llc_prefetches,omitempty"`
+	LlcPrefetchMisses      *uint64  `protobuf:"varint,37,opt,name=llc_prefetch_misses" json:"llc_prefetch_misses,omitempty"`
+	DtlbLoads              *uint64  `protobuf:"varint,38,opt,name=dtlb_loads" json:"dtlb_loads,omitempty"`
+	DtlbLoadMisses         *uint64  `protobuf:"varint,39,opt,name=dtlb_load_misses" json:"dtlb_load_misses,omitempty"`
+	DtlbStores             *uint64  `protobuf:"varint,40,opt,name=dtlb_stores" json:"dtlb_stores,omitempty"`
+	DtlbStoreMisses        *uint64  `protobuf:"varint,41,opt,name=dtlb_store_misses" json:"dtlb_store_misses,omitempty"`
+	DtlbPrefetches         *uint64  `protobuf:"varint,42,opt,name=dtlb_prefetches" json:"dtlb_prefetches,omitempty"`
+	DtlbPrefetchMisses     *uint64  `protobuf:"varint,43,opt,name=dtlb_prefetch_misses" json:"dtlb_prefetch_misses,omitempty"`
+	ItlbLoads              *uint64  `protobuf:"varint,44,opt,name=itlb_loads" json:"itlb_loads,omitempty"`
+	ItlbLoadMisses         *uint64  `protobuf:"varint,45,opt,name=itlb_load_misses" json:"itlb_load_misses,omitempty"`
+	BranchLoads            *uint64  `protobuf:"varint,46,opt,name=branch_loads" json:"branch_loads,omitempty"`
+	BranchLoadMisses       *uint64  `protobuf:"varint,47,opt,name=branch_load_misses" json:"branch_load_misses,omitempty"`
+	NodeLoads              *uint64  `protobuf:"varint,48,opt,name=node_loads" json:"node_loads,omitempty"`
+	NodeLoadMisses         *uint64  `protobuf:"varint,49,opt,name=node_load_misses" json:"node_load_misses,omitempty"`
+	NodeStores             *uint64  `protobuf:"varint,50,opt,name=node_stores" json:"node_stores,omitempty"`
+	NodeStoreMisses        *uint64  `protobuf:"varint,51,opt,name=node_store_misses" json:"node_store_misses,omitempty"`
+	NodePrefetches         *uint64  `protobuf:"varint,52,opt,name=node_prefetches" json:"node_prefetches,omitempty"`
+	NodePrefetchMisses     *uint64  `protobuf:"varint,53,opt,name=node_prefetch_misses" json:"node_prefetch_misses,omitempty"`
+	XXX_unrecognized       []byte   `json:"-"`
+}
+
+func (m *PerfStatistics) Reset()         { *m = PerfStatistics{} }
+func (m *PerfStatistics) String() string { return proto.CompactTextString(m) }
+func (*PerfStatistics) ProtoMessage()    {}
+
+func (m *PerfStatistics) GetTimestamp() float64 {
+	if m != nil && m.Timestamp != nil {
+		return *m.Timestamp
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDuration() float64 {
+	if m != nil && m.Duration != nil {
+		return *m.Duration
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetCycles() uint64 {
+	if m != nil && m.Cycles != nil {
+		return *m.Cycles
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetStalledCyclesFrontend() uint64 {
+	if m != nil && m.StalledCyclesFrontend != nil {
+		return *m.StalledCyclesFrontend
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetStalledCyclesBackend() uint64 {
+	if m != nil && m.StalledCyclesBackend != nil {
+		return *m.StalledCyclesBackend
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetInstructions() uint64 {
+	if m != nil && m.Instructions != nil {
+		return *m.Instructions
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetCacheReferences() uint64 {
+	if m != nil && m.CacheReferences != nil {
+		return *m.CacheReferences
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetCacheMisses() uint64 {
+	if m != nil && m.CacheMisses != nil {
+		return *m.CacheMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetBranches() uint64 {
+	if m != nil && m.Branches != nil {
+		return *m.Branches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetBranchMisses() uint64 {
+	if m != nil && m.BranchMisses != nil {
+		return *m.BranchMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetBusCycles() uint64 {
+	if m != nil && m.BusCycles != nil {
+		return *m.BusCycles
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetRefCycles() uint64 {
+	if m != nil && m.RefCycles != nil {
+		return *m.RefCycles
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetCpuClock() float64 {
+	if m != nil && m.CpuClock != nil {
+		return *m.CpuClock
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetTaskClock() float64 {
+	if m != nil && m.TaskClock != nil {
+		return *m.TaskClock
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetPageFaults() uint64 {
+	if m != nil && m.PageFaults != nil {
+		return *m.PageFaults
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetMinorFaults() uint64 {
+	if m != nil && m.MinorFaults != nil {
+		return *m.MinorFaults
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetMajorFaults() uint64 {
+	if m != nil && m.MajorFaults != nil {
+		return *m.MajorFaults
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetContextSwitches() uint64 {
+	if m != nil && m.ContextSwitches != nil {
+		return *m.ContextSwitches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetCpuMigrations() uint64 {
+	if m != nil && m.CpuMigrations != nil {
+		return *m.CpuMigrations
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetAlignmentFaults() uint64 {
+	if m != nil && m.AlignmentFaults != nil {
+		return *m.AlignmentFaults
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetEmulationFaults() uint64 {
+	if m != nil && m.EmulationFaults != nil {
+		return *m.EmulationFaults
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1DcacheLoads() uint64 {
+	if m != nil && m.L1DcacheLoads != nil {
+		return *m.L1DcacheLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1DcacheLoadMisses() uint64 {
+	if m != nil && m.L1DcacheLoadMisses != nil {
+		return *m.L1DcacheLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1DcacheStores() uint64 {
+	if m != nil && m.L1DcacheStores != nil {
+		return *m.L1DcacheStores
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1DcacheStoreMisses() uint64 {
+	if m != nil && m.L1DcacheStoreMisses != nil {
+		return *m.L1DcacheStoreMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1DcachePrefetches() uint64 {
+	if m != nil && m.L1DcachePrefetches != nil {
+		return *m.L1DcachePrefetches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1DcachePrefetchMisses() uint64 {
+	if m != nil && m.L1DcachePrefetchMisses != nil {
+		return *m.L1DcachePrefetchMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1IcacheLoads() uint64 {
+	if m != nil && m.L1IcacheLoads != nil {
+		return *m.L1IcacheLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1IcacheLoadMisses() uint64 {
+	if m != nil && m.L1IcacheLoadMisses != nil {
+		return *m.L1IcacheLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1IcachePrefetches() uint64 {
+	if m != nil && m.L1IcachePrefetches != nil {
+		return *m.L1IcachePrefetches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetL1IcachePrefetchMisses() uint64 {
+	if m != nil && m.L1IcachePrefetchMisses != nil {
+		return *m.L1IcachePrefetchMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetLlcLoads() uint64 {
+	if m != nil && m.LlcLoads != nil {
+		return *m.LlcLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetLlcLoadMisses() uint64 {
+	if m != nil && m.LlcLoadMisses != nil {
+		return *m.LlcLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetLlcStores() uint64 {
+	if m != nil && m.LlcStores != nil {
+		return *m.LlcStores
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetLlcStoreMisses() uint64 {
+	if m != nil && m.LlcStoreMisses != nil {
+		return *m.LlcStoreMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetLlcPrefetches() uint64 {
+	if m != nil && m.LlcPrefetches != nil {
+		return *m.LlcPrefetches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetLlcPrefetchMisses() uint64 {
+	if m != nil && m.LlcPrefetchMisses != nil {
+		return *m.LlcPrefetchMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDtlbLoads() uint64 {
+	if m != nil && m.DtlbLoads != nil {
+		return *m.DtlbLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDtlbLoadMisses() uint64 {
+	if m != nil && m.DtlbLoadMisses != nil {
+		return *m.DtlbLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDtlbStores() uint64 {
+	if m != nil && m.DtlbStores != nil {
+		return *m.DtlbStores
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDtlbStoreMisses() uint64 {
+	if m != nil && m.DtlbStoreMisses != nil {
+		return *m.DtlbStoreMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDtlbPrefetches() uint64 {
+	if m != nil && m.DtlbPrefetches != nil {
+		return *m.DtlbPrefetches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetDtlbPrefetchMisses() uint64 {
+	if m != nil && m.DtlbPrefetchMisses != nil {
+		return *m.DtlbPrefetchMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetItlbLoads() uint64 {
+	if m != nil && m.ItlbLoads != nil {
+		return *m.ItlbLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetItlbLoadMisses() uint64 {
+	if m != nil && m.ItlbLoadMisses != nil {
+		return *m.ItlbLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetBranchLoads() uint64 {
+	if m != nil && m.BranchLoads != nil {
+		return *m.BranchLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetBranchLoadMisses() uint64 {
+	if m != nil && m.BranchLoadMisses != nil {
+		return *m.BranchLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetNodeLoads() uint64 {
+	if m != nil && m.NodeLoads != nil {
+		return *m.NodeLoads
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetNodeLoadMisses() uint64 {
+	if m != nil && m.NodeLoadMisses != nil {
+		return *m.NodeLoadMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetNodeStores() uint64 {
+	if m != nil && m.NodeStores != nil {
+		return *m.NodeStores
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetNodeStoreMisses() uint64 {
+	if m != nil && m.NodeStoreMisses != nil {
+		return *m.NodeStoreMisses
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetNodePrefetches() uint64 {
+	if m != nil && m.NodePrefetches != nil {
+		return *m.NodePrefetches
+	}
+	return 0
+}
+
+func (m *PerfStatistics) GetNodePrefetchMisses() uint64 {
+	if m != nil && m.NodePrefetchMisses != nil {
+		return *m.NodePrefetchMisses
+	}
+	return 0
+}
+
 type Request struct {
 	SlaveId          *SlaveID    `protobuf:"bytes,1,opt,name=slave_id" json:"slave_id,omitempty"`
 	Resources        []*Resource `protobuf:"bytes,2,rep,name=resources" json:"resources,omitempty"`
@@ -1359,9 +1828,6 @@ func (m *Request) GetResources() []*Resource {
 	return nil
 }
 
-// *
-// Describes some resources available on a slave. An offer only
-// contains resources from a single slave.
 type Offer struct {
 	Id               *OfferID      `protobuf:"bytes,1,req,name=id" json:"id,omitempty"`
 	FrameworkId      *FrameworkID  `protobuf:"bytes,2,req,name=framework_id" json:"framework_id,omitempty"`
@@ -1426,21 +1892,17 @@ func (m *Offer) GetExecutorIds() []*ExecutorID {
 	return nil
 }
 
-// *
-// Describes a task. Passed from the scheduler all the way to an
-// executor (see SchedulerDriver::launchTasks and
-// Executor::launchTask). Either ExecutorInfo or CommandInfo should be set.
-// A different executor can be used to launch this task, and subsequent tasks
-// meant for the same executor can reuse the same ExecutorInfo struct.
 type TaskInfo struct {
-	Name             *string       `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
-	TaskId           *TaskID       `protobuf:"bytes,2,req,name=task_id" json:"task_id,omitempty"`
-	SlaveId          *SlaveID      `protobuf:"bytes,3,req,name=slave_id" json:"slave_id,omitempty"`
-	Resources        []*Resource   `protobuf:"bytes,4,rep,name=resources" json:"resources,omitempty"`
-	Executor         *ExecutorInfo `protobuf:"bytes,5,opt,name=executor" json:"executor,omitempty"`
-	Command          *CommandInfo  `protobuf:"bytes,7,opt,name=command" json:"command,omitempty"`
-	Data             []byte        `protobuf:"bytes,6,opt,name=data" json:"data,omitempty"`
-	XXX_unrecognized []byte        `json:"-"`
+	Name             *string        `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
+	TaskId           *TaskID        `protobuf:"bytes,2,req,name=task_id" json:"task_id,omitempty"`
+	SlaveId          *SlaveID       `protobuf:"bytes,3,req,name=slave_id" json:"slave_id,omitempty"`
+	Resources        []*Resource    `protobuf:"bytes,4,rep,name=resources" json:"resources,omitempty"`
+	Executor         *ExecutorInfo  `protobuf:"bytes,5,opt,name=executor" json:"executor,omitempty"`
+	Command          *CommandInfo   `protobuf:"bytes,7,opt,name=command" json:"command,omitempty"`
+	Container        *ContainerInfo `protobuf:"bytes,9,opt,name=container" json:"container,omitempty"`
+	Data             []byte         `protobuf:"bytes,6,opt,name=data" json:"data,omitempty"`
+	HealthCheck      *HealthCheck   `protobuf:"bytes,8,opt,name=health_check" json:"health_check,omitempty"`
+	XXX_unrecognized []byte         `json:"-"`
 }
 
 func (m *TaskInfo) Reset()         { *m = TaskInfo{} }
@@ -1489,6 +1951,13 @@ func (m *TaskInfo) GetCommand() *CommandInfo {
 	return nil
 }
 
+func (m *TaskInfo) GetContainer() *ContainerInfo {
+	if m != nil {
+		return m.Container
+	}
+	return nil
+}
+
 func (m *TaskInfo) GetData() []byte {
 	if m != nil {
 		return m.Data
@@ -1496,16 +1965,23 @@ func (m *TaskInfo) GetData() []byte {
 	return nil
 }
 
-// *
-// Describes the current status of a task.
+func (m *TaskInfo) GetHealthCheck() *HealthCheck {
+	if m != nil {
+		return m.HealthCheck
+	}
+	return nil
+}
+
 type TaskStatus struct {
-	TaskId           *TaskID    `protobuf:"bytes,1,req,name=task_id" json:"task_id,omitempty"`
-	State            *TaskState `protobuf:"varint,2,req,name=state,enum=mesos.TaskState" json:"state,omitempty"`
-	Message          *string    `protobuf:"bytes,4,opt,name=message" json:"message,omitempty"`
-	Data             []byte     `protobuf:"bytes,3,opt,name=data" json:"data,omitempty"`
-	SlaveId          *SlaveID   `protobuf:"bytes,5,opt,name=slave_id" json:"slave_id,omitempty"`
-	Timestamp        *float64   `protobuf:"fixed64,6,opt,name=timestamp" json:"timestamp,omitempty"`
-	XXX_unrecognized []byte     `json:"-"`
+	TaskId           *TaskID     `protobuf:"bytes,1,req,name=task_id" json:"task_id,omitempty"`
+	State            *TaskState  `protobuf:"varint,2,req,name=state,enum=mesos.TaskState" json:"state,omitempty"`
+	Message          *string     `protobuf:"bytes,4,opt,name=message" json:"message,omitempty"`
+	Data             []byte      `protobuf:"bytes,3,opt,name=data" json:"data,omitempty"`
+	SlaveId          *SlaveID    `protobuf:"bytes,5,opt,name=slave_id" json:"slave_id,omitempty"`
+	ExecutorId       *ExecutorID `protobuf:"bytes,7,opt,name=executor_id" json:"executor_id,omitempty"`
+	Timestamp        *float64    `protobuf:"fixed64,6,opt,name=timestamp" json:"timestamp,omitempty"`
+	Healthy          *bool       `protobuf:"varint,8,opt,name=healthy" json:"healthy,omitempty"`
+	XXX_unrecognized []byte      `json:"-"`
 }
 
 func (m *TaskStatus) Reset()         { *m = TaskStatus{} }
@@ -1523,7 +1999,7 @@ func (m *TaskStatus) GetState() TaskState {
 	if m != nil && m.State != nil {
 		return *m.State
 	}
-	return TaskState_TASK_STAGING
+	return 0
 }
 
 func (m *TaskStatus) GetMessage() string {
@@ -1547,6 +2023,13 @@ func (m *TaskStatus) GetSlaveId() *SlaveID {
 	return nil
 }
 
+func (m *TaskStatus) GetExecutorId() *ExecutorID {
+	if m != nil {
+		return m.ExecutorId
+	}
+	return nil
+}
+
 func (m *TaskStatus) GetTimestamp() float64 {
 	if m != nil && m.Timestamp != nil {
 		return *m.Timestamp
@@ -1554,16 +2037,14 @@ func (m *TaskStatus) GetTimestamp() float64 {
 	return 0
 }
 
-// *
-// Describes possible filters that can be applied to unused resources
-// (see SchedulerDriver::launchTasks) to influence the allocator.
+func (m *TaskStatus) GetHealthy() bool {
+	if m != nil && m.Healthy != nil {
+		return *m.Healthy
+	}
+	return false
+}
+
 type Filters struct {
-	// Time to consider unused resources refused. Note that all unused
-	// resources will be considered refused and use the default value
-	// (below) regardless of whether Filters was passed to
-	// SchedulerDriver::launchTasks. You MUST pass Filters with this
-	// field set to change this behavior (i.e., get another offer which
-	// includes unused resources sooner or later than the default).
 	RefuseSeconds    *float64 `protobuf:"fixed64,1,opt,name=refuse_seconds,def=5" json:"refuse_seconds,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
@@ -1581,10 +2062,6 @@ func (m *Filters) GetRefuseSeconds() float64 {
 	return Default_Filters_RefuseSeconds
 }
 
-// *
-// Describes a collection of environment variables. This is used with
-// CommandInfo in order to set environment variables before running a
-// command.
 type Environment struct {
 	Variables        []*Environment_Variable `protobuf:"bytes,1,rep,name=variables" json:"variables,omitempty"`
 	XXX_unrecognized []byte                  `json:"-"`
@@ -1625,8 +2102,6 @@ func (m *Environment_Variable) GetValue() string {
 	return ""
 }
 
-// *
-// A generic (key, value) pair used in various places for parameters.
 type Parameter struct {
 	Key              *string `protobuf:"bytes,1,req,name=key" json:"key,omitempty"`
 	Value            *string `protobuf:"bytes,2,req,name=value" json:"value,omitempty"`
@@ -1651,8 +2126,6 @@ func (m *Parameter) GetValue() string {
 	return ""
 }
 
-// *
-// Collection of Parameter.
 type Parameters struct {
 	Parameter        []*Parameter `protobuf:"bytes,1,rep,name=parameter" json:"parameter,omitempty"`
 	XXX_unrecognized []byte       `json:"-"`
@@ -1669,13 +2142,6 @@ func (m *Parameters) GetParameter() []*Parameter {
 	return nil
 }
 
-// *
-// Credential used for authentication.
-//
-// NOTE: The 'principal' is used for authenticating the framework or slave
-// with the master. This is different from 'FrameworkInfo.user'
-// which is used to determine the user under which the framework's
-// executors/tasks are run.
 type Credential struct {
 	Principal        *string `protobuf:"bytes,1,req,name=principal" json:"principal,omitempty"`
 	Secret           []byte  `protobuf:"bytes,2,opt,name=secret" json:"secret,omitempty"`
@@ -1700,8 +2166,22 @@ func (m *Credential) GetSecret() []byte {
 	return nil
 }
 
-// *
-// ACLs used for authorization.
+type Credentials struct {
+	Credentials      []*Credential `protobuf:"bytes,1,rep,name=credentials" json:"credentials,omitempty"`
+	XXX_unrecognized []byte        `json:"-"`
+}
+
+func (m *Credentials) Reset()         { *m = Credentials{} }
+func (m *Credentials) String() string { return proto.CompactTextString(m) }
+func (*Credentials) ProtoMessage()    {}
+
+func (m *Credentials) GetCredentials() []*Credential {
+	if m != nil {
+		return m.Credentials
+	}
+	return nil
+}
+
 type ACL struct {
 	XXX_unrecognized []byte `json:"-"`
 }
@@ -1710,10 +2190,6 @@ func (m *ACL) Reset()         { *m = ACL{} }
 func (m *ACL) String() string { return proto.CompactTextString(m) }
 func (*ACL) ProtoMessage()    {}
 
-// Entity is used to describe a subject(s) or an object(s) of an ACL.
-// NOTE:
-// To allow everyone access to an Entity set its type to 'ANY'.
-// To deny access to an Entity set its type to 'NONE'.
 type ACL_Entity struct {
 	Type             *ACL_Entity_Type `protobuf:"varint,1,opt,name=type,enum=mesos.ACL_Entity_Type,def=0" json:"type,omitempty"`
 	Values           []string         `protobuf:"bytes,2,rep,name=values" json:"values,omitempty"`
@@ -1740,168 +2216,84 @@ func (m *ACL_Entity) GetValues() []string {
 	return nil
 }
 
-// ACLs.
-type ACL_RunTasks struct {
-	// Subjects.
-	Principals *ACL_Entity `protobuf:"bytes,1,req,name=principals" json:"principals,omitempty"`
-	// Objects.
-	Users            *ACL_Entity `protobuf:"bytes,2,req,name=users" json:"users,omitempty"`
-	XXX_unrecognized []byte      `json:"-"`
-}
-
-func (m *ACL_RunTasks) Reset()         { *m = ACL_RunTasks{} }
-func (m *ACL_RunTasks) String() string { return proto.CompactTextString(m) }
-func (*ACL_RunTasks) ProtoMessage()    {}
-
-func (m *ACL_RunTasks) GetPrincipals() *ACL_Entity {
-	if m != nil {
-		return m.Principals
-	}
-	return nil
-}
-
-func (m *ACL_RunTasks) GetUsers() *ACL_Entity {
-	if m != nil {
-		return m.Users
-	}
-	return nil
-}
-
-type ACL_ReceiveOffers struct {
-	// Subjects.
-	Principals *ACL_Entity `protobuf:"bytes,1,req,name=principals" json:"principals,omitempty"`
-	// Objects.
+type ACL_RegisterFramework struct {
+	Principals       *ACL_Entity `protobuf:"bytes,1,req,name=principals" json:"principals,omitempty"`
 	Roles            *ACL_Entity `protobuf:"bytes,2,req,name=roles" json:"roles,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
-func (m *ACL_ReceiveOffers) Reset()         { *m = ACL_ReceiveOffers{} }
-func (m *ACL_ReceiveOffers) String() string { return proto.CompactTextString(m) }
-func (*ACL_ReceiveOffers) ProtoMessage()    {}
+func (m *ACL_RegisterFramework) Reset()         { *m = ACL_RegisterFramework{} }
+func (m *ACL_RegisterFramework) String() string { return proto.CompactTextString(m) }
+func (*ACL_RegisterFramework) ProtoMessage()    {}
 
-func (m *ACL_ReceiveOffers) GetPrincipals() *ACL_Entity {
+func (m *ACL_RegisterFramework) GetPrincipals() *ACL_Entity {
 	if m != nil {
 		return m.Principals
 	}
 	return nil
 }
 
-func (m *ACL_ReceiveOffers) GetRoles() *ACL_Entity {
+func (m *ACL_RegisterFramework) GetRoles() *ACL_Entity {
 	if m != nil {
 		return m.Roles
 	}
 	return nil
 }
 
-type ACL_HTTPGet struct {
-	// Subjects (At least one of these should be set).
-	Usernames *ACL_Entity `protobuf:"bytes,1,opt,name=usernames" json:"usernames,omitempty"`
-	Ips       *ACL_Entity `protobuf:"bytes,2,opt,name=ips" json:"ips,omitempty"`
-	Hostnames *ACL_Entity `protobuf:"bytes,3,opt,name=hostnames" json:"hostnames,omitempty"`
-	// Objects.
-	Urls             *ACL_Entity `protobuf:"bytes,4,req,name=urls" json:"urls,omitempty"`
+type ACL_RunTask struct {
+	Principals       *ACL_Entity `protobuf:"bytes,1,req,name=principals" json:"principals,omitempty"`
+	Users            *ACL_Entity `protobuf:"bytes,2,req,name=users" json:"users,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
-func (m *ACL_HTTPGet) Reset()         { *m = ACL_HTTPGet{} }
-func (m *ACL_HTTPGet) String() string { return proto.CompactTextString(m) }
-func (*ACL_HTTPGet) ProtoMessage()    {}
+func (m *ACL_RunTask) Reset()         { *m = ACL_RunTask{} }
+func (m *ACL_RunTask) String() string { return proto.CompactTextString(m) }
+func (*ACL_RunTask) ProtoMessage()    {}
 
-func (m *ACL_HTTPGet) GetUsernames() *ACL_Entity {
+func (m *ACL_RunTask) GetPrincipals() *ACL_Entity {
 	if m != nil {
-		return m.Usernames
+		return m.Principals
 	}
 	return nil
 }
 
-func (m *ACL_HTTPGet) GetIps() *ACL_Entity {
+func (m *ACL_RunTask) GetUsers() *ACL_Entity {
 	if m != nil {
-		return m.Ips
+		return m.Users
 	}
 	return nil
 }
 
-func (m *ACL_HTTPGet) GetHostnames() *ACL_Entity {
+type ACL_ShutdownFramework struct {
+	Principals          *ACL_Entity `protobuf:"bytes,1,req,name=principals" json:"principals,omitempty"`
+	FrameworkPrincipals *ACL_Entity `protobuf:"bytes,2,req,name=framework_principals" json:"framework_principals,omitempty"`
+	XXX_unrecognized    []byte      `json:"-"`
+}
+
+func (m *ACL_ShutdownFramework) Reset()         { *m = ACL_ShutdownFramework{} }
+func (m *ACL_ShutdownFramework) String() string { return proto.CompactTextString(m) }
+func (*ACL_ShutdownFramework) ProtoMessage()    {}
+
+func (m *ACL_ShutdownFramework) GetPrincipals() *ACL_Entity {
 	if m != nil {
-		return m.Hostnames
+		return m.Principals
 	}
 	return nil
 }
 
-func (m *ACL_HTTPGet) GetUrls() *ACL_Entity {
+func (m *ACL_ShutdownFramework) GetFrameworkPrincipals() *ACL_Entity {
 	if m != nil {
-		return m.Urls
+		return m.FrameworkPrincipals
 	}
 	return nil
 }
 
-type ACL_HTTPPut struct {
-	// Subjects (At least one of these should be set).
-	Usernames *ACL_Entity `protobuf:"bytes,1,opt,name=usernames" json:"usernames,omitempty"`
-	Ips       *ACL_Entity `protobuf:"bytes,2,opt,name=ips" json:"ips,omitempty"`
-	Hostnames *ACL_Entity `protobuf:"bytes,3,opt,name=hostnames" json:"hostnames,omitempty"`
-	// Objects.
-	Urls             *ACL_Entity `protobuf:"bytes,4,req,name=urls" json:"urls,omitempty"`
-	XXX_unrecognized []byte      `json:"-"`
-}
-
-func (m *ACL_HTTPPut) Reset()         { *m = ACL_HTTPPut{} }
-func (m *ACL_HTTPPut) String() string { return proto.CompactTextString(m) }
-func (*ACL_HTTPPut) ProtoMessage()    {}
-
-func (m *ACL_HTTPPut) GetUsernames() *ACL_Entity {
-	if m != nil {
-		return m.Usernames
-	}
-	return nil
-}
-
-func (m *ACL_HTTPPut) GetIps() *ACL_Entity {
-	if m != nil {
-		return m.Ips
-	}
-	return nil
-}
-
-func (m *ACL_HTTPPut) GetHostnames() *ACL_Entity {
-	if m != nil {
-		return m.Hostnames
-	}
-	return nil
-}
-
-func (m *ACL_HTTPPut) GetUrls() *ACL_Entity {
-	if m != nil {
-		return m.Urls
-	}
-	return nil
-}
-
-//
-// Collection of ACL.
-//
-// Each authorization request is evaluated against the ACLs in the order
-// they are defined.
-//
-// For simplicity, the ACLs for a given action are not aggregated even
-// when they have the same subjects or objects. The first ACL that
-// matches the request determines whether that request should be
-// permitted or not. An ACL matches iff both the subjects
-// (e.g., clients, principals) and the objects (e.g., urls, users,
-// roles) of the ACL match the request.
-//
-// If none of the ACLs match the request, the 'permissive' field
-// determines whether the request should be permitted or not.
-//
-// TODO(vinod): Do aggregation of ACLs when possible.
-//
 type ACLs struct {
-	Permissive       *bool                `protobuf:"varint,1,opt,name=permissive,def=1" json:"permissive,omitempty"`
-	RunTasks         []*ACL_RunTasks      `protobuf:"bytes,2,rep,name=run_tasks" json:"run_tasks,omitempty"`
-	ReceiveOffers    []*ACL_ReceiveOffers `protobuf:"bytes,3,rep,name=receive_offers" json:"receive_offers,omitempty"`
-	HttpGet          []*ACL_HTTPGet       `protobuf:"bytes,4,rep,name=http_get" json:"http_get,omitempty"`
-	HttpPut          []*ACL_HTTPPut       `protobuf:"bytes,5,rep,name=http_put" json:"http_put,omitempty"`
-	XXX_unrecognized []byte               `json:"-"`
+	Permissive         *bool                    `protobuf:"varint,1,opt,name=permissive,def=1" json:"permissive,omitempty"`
+	RegisterFrameworks []*ACL_RegisterFramework `protobuf:"bytes,2,rep,name=register_frameworks" json:"register_frameworks,omitempty"`
+	RunTasks           []*ACL_RunTask           `protobuf:"bytes,3,rep,name=run_tasks" json:"run_tasks,omitempty"`
+	ShutdownFrameworks []*ACL_ShutdownFramework `protobuf:"bytes,4,rep,name=shutdown_frameworks" json:"shutdown_frameworks,omitempty"`
+	XXX_unrecognized   []byte                   `json:"-"`
 }
 
 func (m *ACLs) Reset()         { *m = ACLs{} }
@@ -1917,32 +2309,219 @@ func (m *ACLs) GetPermissive() bool {
 	return Default_ACLs_Permissive
 }
 
-func (m *ACLs) GetRunTasks() []*ACL_RunTasks {
+func (m *ACLs) GetRegisterFrameworks() []*ACL_RegisterFramework {
+	if m != nil {
+		return m.RegisterFrameworks
+	}
+	return nil
+}
+
+func (m *ACLs) GetRunTasks() []*ACL_RunTask {
 	if m != nil {
 		return m.RunTasks
 	}
 	return nil
 }
 
-func (m *ACLs) GetReceiveOffers() []*ACL_ReceiveOffers {
+func (m *ACLs) GetShutdownFrameworks() []*ACL_ShutdownFramework {
 	if m != nil {
-		return m.ReceiveOffers
+		return m.ShutdownFrameworks
 	}
 	return nil
 }
 
-func (m *ACLs) GetHttpGet() []*ACL_HTTPGet {
+type RateLimit struct {
+	Qps              *float64 `protobuf:"fixed64,1,opt,name=qps" json:"qps,omitempty"`
+	Principal        *string  `protobuf:"bytes,2,req,name=principal" json:"principal,omitempty"`
+	Capacity         *uint64  `protobuf:"varint,3,opt,name=capacity" json:"capacity,omitempty"`
+	XXX_unrecognized []byte   `json:"-"`
+}
+
+func (m *RateLimit) Reset()         { *m = RateLimit{} }
+func (m *RateLimit) String() string { return proto.CompactTextString(m) }
+func (*RateLimit) ProtoMessage()    {}
+
+func (m *RateLimit) GetQps() float64 {
+	if m != nil && m.Qps != nil {
+		return *m.Qps
+	}
+	return 0
+}
+
+func (m *RateLimit) GetPrincipal() string {
+	if m != nil && m.Principal != nil {
+		return *m.Principal
+	}
+	return ""
+}
+
+func (m *RateLimit) GetCapacity() uint64 {
+	if m != nil && m.Capacity != nil {
+		return *m.Capacity
+	}
+	return 0
+}
+
+type RateLimits struct {
+	Limits                   []*RateLimit `protobuf:"bytes,1,rep,name=limits" json:"limits,omitempty"`
+	AggregateDefaultQps      *float64     `protobuf:"fixed64,2,opt,name=aggregate_default_qps" json:"aggregate_default_qps,omitempty"`
+	AggregateDefaultCapacity *uint64      `protobuf:"varint,3,opt,name=aggregate_default_capacity" json:"aggregate_default_capacity,omitempty"`
+	XXX_unrecognized         []byte       `json:"-"`
+}
+
+func (m *RateLimits) Reset()         { *m = RateLimits{} }
+func (m *RateLimits) String() string { return proto.CompactTextString(m) }
+func (*RateLimits) ProtoMessage()    {}
+
+func (m *RateLimits) GetLimits() []*RateLimit {
 	if m != nil {
-		return m.HttpGet
+		return m.Limits
 	}
 	return nil
 }
 
-func (m *ACLs) GetHttpPut() []*ACL_HTTPPut {
+func (m *RateLimits) GetAggregateDefaultQps() float64 {
+	if m != nil && m.AggregateDefaultQps != nil {
+		return *m.AggregateDefaultQps
+	}
+	return 0
+}
+
+func (m *RateLimits) GetAggregateDefaultCapacity() uint64 {
+	if m != nil && m.AggregateDefaultCapacity != nil {
+		return *m.AggregateDefaultCapacity
+	}
+	return 0
+}
+
+type Volume struct {
+	ContainerPath    *string      `protobuf:"bytes,1,req,name=container_path" json:"container_path,omitempty"`
+	HostPath         *string      `protobuf:"bytes,2,opt,name=host_path" json:"host_path,omitempty"`
+	Mode             *Volume_Mode `protobuf:"varint,3,req,name=mode,enum=mesos.Volume_Mode" json:"mode,omitempty"`
+	XXX_unrecognized []byte       `json:"-"`
+}
+
+func (m *Volume) Reset()         { *m = Volume{} }
+func (m *Volume) String() string { return proto.CompactTextString(m) }
+func (*Volume) ProtoMessage()    {}
+
+func (m *Volume) GetContainerPath() string {
+	if m != nil && m.ContainerPath != nil {
+		return *m.ContainerPath
+	}
+	return ""
+}
+
+func (m *Volume) GetHostPath() string {
+	if m != nil && m.HostPath != nil {
+		return *m.HostPath
+	}
+	return ""
+}
+
+func (m *Volume) GetMode() Volume_Mode {
+	if m != nil && m.Mode != nil {
+		return *m.Mode
+	}
+	return 0
+}
+
+type ContainerInfo struct {
+	Type             *ContainerInfo_Type       `protobuf:"varint,1,req,name=type,enum=mesos.ContainerInfo_Type" json:"type,omitempty"`
+	Volumes          []*Volume                 `protobuf:"bytes,2,rep,name=volumes" json:"volumes,omitempty"`
+	Docker           *ContainerInfo_DockerInfo `protobuf:"bytes,3,opt,name=docker" json:"docker,omitempty"`
+	XXX_unrecognized []byte                    `json:"-"`
+}
+
+func (m *ContainerInfo) Reset()         { *m = ContainerInfo{} }
+func (m *ContainerInfo) String() string { return proto.CompactTextString(m) }
+func (*ContainerInfo) ProtoMessage()    {}
+
+func (m *ContainerInfo) GetType() ContainerInfo_Type {
+	if m != nil && m.Type != nil {
+		return *m.Type
+	}
+	return 0
+}
+
+func (m *ContainerInfo) GetVolumes() []*Volume {
 	if m != nil {
-		return m.HttpPut
+		return m.Volumes
 	}
 	return nil
+}
+
+func (m *ContainerInfo) GetDocker() *ContainerInfo_DockerInfo {
+	if m != nil {
+		return m.Docker
+	}
+	return nil
+}
+
+type ContainerInfo_DockerInfo struct {
+	Image            *string                                 `protobuf:"bytes,1,req,name=image" json:"image,omitempty"`
+	Network          *ContainerInfo_DockerInfo_Network       `protobuf:"varint,2,opt,name=network,enum=mesos.ContainerInfo_DockerInfo_Network,def=1" json:"network,omitempty"`
+	PortMappings     []*ContainerInfo_DockerInfo_PortMapping `protobuf:"bytes,3,rep,name=port_mappings" json:"port_mappings,omitempty"`
+	XXX_unrecognized []byte                                  `json:"-"`
+}
+
+func (m *ContainerInfo_DockerInfo) Reset()         { *m = ContainerInfo_DockerInfo{} }
+func (m *ContainerInfo_DockerInfo) String() string { return proto.CompactTextString(m) }
+func (*ContainerInfo_DockerInfo) ProtoMessage()    {}
+
+const Default_ContainerInfo_DockerInfo_Network ContainerInfo_DockerInfo_Network = ContainerInfo_DockerInfo_HOST
+
+func (m *ContainerInfo_DockerInfo) GetImage() string {
+	if m != nil && m.Image != nil {
+		return *m.Image
+	}
+	return ""
+}
+
+func (m *ContainerInfo_DockerInfo) GetNetwork() ContainerInfo_DockerInfo_Network {
+	if m != nil && m.Network != nil {
+		return *m.Network
+	}
+	return Default_ContainerInfo_DockerInfo_Network
+}
+
+func (m *ContainerInfo_DockerInfo) GetPortMappings() []*ContainerInfo_DockerInfo_PortMapping {
+	if m != nil {
+		return m.PortMappings
+	}
+	return nil
+}
+
+type ContainerInfo_DockerInfo_PortMapping struct {
+	HostPort         *uint32 `protobuf:"varint,1,req,name=host_port" json:"host_port,omitempty"`
+	ContainerPort    *uint32 `protobuf:"varint,2,req,name=container_port" json:"container_port,omitempty"`
+	Protocol         *string `protobuf:"bytes,3,opt,name=protocol" json:"protocol,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
+}
+
+func (m *ContainerInfo_DockerInfo_PortMapping) Reset()         { *m = ContainerInfo_DockerInfo_PortMapping{} }
+func (m *ContainerInfo_DockerInfo_PortMapping) String() string { return proto.CompactTextString(m) }
+func (*ContainerInfo_DockerInfo_PortMapping) ProtoMessage()    {}
+
+func (m *ContainerInfo_DockerInfo_PortMapping) GetHostPort() uint32 {
+	if m != nil && m.HostPort != nil {
+		return *m.HostPort
+	}
+	return 0
+}
+
+func (m *ContainerInfo_DockerInfo_PortMapping) GetContainerPort() uint32 {
+	if m != nil && m.ContainerPort != nil {
+		return *m.ContainerPort
+	}
+	return 0
+}
+
+func (m *ContainerInfo_DockerInfo_PortMapping) GetProtocol() string {
+	if m != nil && m.Protocol != nil {
+		return *m.Protocol
+	}
+	return ""
 }
 
 func init() {
@@ -1950,4 +2529,7 @@ func init() {
 	proto.RegisterEnum("mesos.TaskState", TaskState_name, TaskState_value)
 	proto.RegisterEnum("mesos.Value_Type", Value_Type_name, Value_Type_value)
 	proto.RegisterEnum("mesos.ACL_Entity_Type", ACL_Entity_Type_name, ACL_Entity_Type_value)
+	proto.RegisterEnum("mesos.Volume_Mode", Volume_Mode_name, Volume_Mode_value)
+	proto.RegisterEnum("mesos.ContainerInfo_Type", ContainerInfo_Type_name, ContainerInfo_Type_value)
+	proto.RegisterEnum("mesos.ContainerInfo_DockerInfo_Network", ContainerInfo_DockerInfo_Network_name, ContainerInfo_DockerInfo_Network_value)
 }

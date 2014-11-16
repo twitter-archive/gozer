@@ -2,29 +2,20 @@
 // source: registry.proto
 // DO NOT EDIT!
 
-/*
-Package mesos_internal is a generated protocol buffer package.
-
-It is generated from these files:
-	registry.proto
-
-It has these top-level messages:
-	Registry
-*/
 package mesos_internal
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 import mesos "github.com/twitter/gozer/proto/mesos.pb"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
 type Registry struct {
-	// Most recent leading master.
-	Master *Registry_Master `protobuf:"bytes,1,opt,name=master" json:"master,omitempty"`
-	// All admitted slaves.
+	Master           *Registry_Master `protobuf:"bytes,1,opt,name=master" json:"master,omitempty"`
 	Slaves           *Registry_Slaves `protobuf:"bytes,2,opt,name=slaves" json:"slaves,omitempty"`
 	XXX_unrecognized []byte           `json:"-"`
 }
