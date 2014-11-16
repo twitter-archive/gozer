@@ -1,7 +1,7 @@
 #! /bin/bash
 set -o errexit ; set -o nounset
 
-MESOS_TAG="0.19.0"
+MESOS_TAG="0.20.1"
 MESOS_REPO="http://git-wip-us.apache.org/repos/asf/mesos.git"
 
 
@@ -19,7 +19,7 @@ protoc-gen-go < /dev/null 2>&1 | fgrep -q 'protoc-gen-go: error:no files to gene
 
 
 # Grab the Mesos repo
-git clone "$MESOS_REPO" mesos-repo
+[[ -d mesos-repo ]] || git clone "$MESOS_REPO" mesos-repo
 info=$(cd mesos-repo && git checkout -q "$MESOS_TAG" && git log -1 --format='format:%H,%at')
 mesos_sha=$(echo "${info}" | cut -d, -f1)
 mesos_ts=$(echo "${info}" | cut -d, -f2-)
@@ -31,8 +31,12 @@ echo "Commit timestamp = ${mesos_ts}"
 
 # Copy all .proto files local
 for file in $(find mesos-repo -name \*.proto | fgrep -v 3rdparty/libprocess/3rdparty/stout/tests); do
+    echo "Copying ${file}"
     cp "${file}" .
 done
+
+rm -rf mesos
+mkdir mesos && mv mesos.proto mesos
 
 # Build all the .proto files
 for file in *.proto; do
@@ -53,7 +57,7 @@ sed -e "s/@GIT_SHA@/${mesos_sha}/" \
     < proto-template.go > ../proto/proto.go
 
 # Cleanup
-rm -rf mesos-repo
+rm -rf mesos-repo mesos
 rm -f *.proto
 
 exit 0
