@@ -2,28 +2,18 @@
 // source: scheduler.proto
 // DO NOT EDIT!
 
-/*
-Package mesos_scheduler is a generated protocol buffer package.
-
-It is generated from these files:
-	scheduler.proto
-
-It has these top-level messages:
-	Event
-	Call
-*/
 package mesos_scheduler
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 import mesos "github.com/twitter/gozer/proto/mesos.pb"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
-// Possible event types, followed by message definitions if
-// applicable.
 type Event_Type int32
 
 const (
@@ -66,6 +56,9 @@ func (x Event_Type) Enum() *Event_Type {
 func (x Event_Type) String() string {
 	return proto.EnumName(Event_Type_name, int32(x))
 }
+func (x Event_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Event_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Event_Type_value, data, "Event_Type")
 	if err != nil {
@@ -75,8 +68,6 @@ func (x *Event_Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Possible call types, followed by message definitions if
-// applicable.
 type Call_Type int32
 
 const (
@@ -128,6 +119,9 @@ func (x Call_Type) Enum() *Call_Type {
 func (x Call_Type) String() string {
 	return proto.EnumName(Call_Type_name, int32(x))
 }
+func (x Call_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Call_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Call_Type_value, data, "Call_Type")
 	if err != nil {
@@ -137,14 +131,7 @@ func (x *Call_Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// *
-// Low-level scheduler event API.
-//
-// An event is described using the standard protocol buffer "union"
-// trick, see https://developers.google.com/protocol-buffers/docs/techniques#union.
 type Event struct {
-	// Type of the event, indicates which optional field below should be
-	// present if that type has a nested message definition.
 	Type             *Event_Type         `protobuf:"varint,1,req,name=type,enum=mesos.scheduler.Event_Type" json:"type,omitempty"`
 	Registered       *Event_Registered   `protobuf:"bytes,2,opt,name=registered" json:"registered,omitempty"`
 	Reregistered     *Event_Reregistered `protobuf:"bytes,3,opt,name=reregistered" json:"reregistered,omitempty"`
@@ -165,7 +152,7 @@ func (m *Event) GetType() Event_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Event_REGISTERED
+	return 0
 }
 
 func (m *Event) GetRegistered() *Event_Registered {
@@ -361,10 +348,7 @@ func (m *Event_Message) GetData() []byte {
 }
 
 type Event_Failure struct {
-	SlaveId *mesos.SlaveID `protobuf:"bytes,1,opt,name=slave_id" json:"slave_id,omitempty"`
-	// If this was just a failure of an executor on a slave then
-	// 'executor_id' will be set and possibly 'status' (if we were
-	// able to determine the exit status).
+	SlaveId          *mesos.SlaveID    `protobuf:"bytes,1,opt,name=slave_id" json:"slave_id,omitempty"`
 	ExecutorId       *mesos.ExecutorID `protobuf:"bytes,2,opt,name=executor_id" json:"executor_id,omitempty"`
 	Status           *int32            `protobuf:"varint,3,opt,name=status" json:"status,omitempty"`
 	XXX_unrecognized []byte            `json:"-"`
@@ -411,27 +395,17 @@ func (m *Event_Error) GetMessage() string {
 	return ""
 }
 
-// *
-// Low-level scheduler call API.
-//
-// Like Event, a Call is described using the standard protocol buffer
-// "union" trick (see above).
 type Call struct {
-	// Identifies who generated this call. Always necessary, but the
-	// only thing that needs to be set for certain calls, e.g.,
-	// REGISTER, REREGISTER, and UNREGISTER.
-	FrameworkInfo *mesos.FrameworkInfo `protobuf:"bytes,1,req,name=framework_info" json:"framework_info,omitempty"`
-	// Type of the call, indicates which optional field below should be
-	// present if that type has a nested message definition.
-	Type             *Call_Type        `protobuf:"varint,2,req,name=type,enum=mesos.scheduler.Call_Type" json:"type,omitempty"`
-	Request          *Call_Request     `protobuf:"bytes,3,opt,name=request" json:"request,omitempty"`
-	Decline          *Call_Decline     `protobuf:"bytes,4,opt,name=decline" json:"decline,omitempty"`
-	Launch           *Call_Launch      `protobuf:"bytes,5,opt,name=launch" json:"launch,omitempty"`
-	Kill             *Call_Kill        `protobuf:"bytes,6,opt,name=kill" json:"kill,omitempty"`
-	Acknowledge      *Call_Acknowledge `protobuf:"bytes,7,opt,name=acknowledge" json:"acknowledge,omitempty"`
-	Reconcile        *Call_Reconcile   `protobuf:"bytes,8,opt,name=reconcile" json:"reconcile,omitempty"`
-	Message          *Call_Message     `protobuf:"bytes,9,opt,name=message" json:"message,omitempty"`
-	XXX_unrecognized []byte            `json:"-"`
+	FrameworkInfo    *mesos.FrameworkInfo `protobuf:"bytes,1,req,name=framework_info" json:"framework_info,omitempty"`
+	Type             *Call_Type           `protobuf:"varint,2,req,name=type,enum=mesos.scheduler.Call_Type" json:"type,omitempty"`
+	Request          *Call_Request        `protobuf:"bytes,3,opt,name=request" json:"request,omitempty"`
+	Decline          *Call_Decline        `protobuf:"bytes,4,opt,name=decline" json:"decline,omitempty"`
+	Launch           *Call_Launch         `protobuf:"bytes,5,opt,name=launch" json:"launch,omitempty"`
+	Kill             *Call_Kill           `protobuf:"bytes,6,opt,name=kill" json:"kill,omitempty"`
+	Acknowledge      *Call_Acknowledge    `protobuf:"bytes,7,opt,name=acknowledge" json:"acknowledge,omitempty"`
+	Reconcile        *Call_Reconcile      `protobuf:"bytes,8,opt,name=reconcile" json:"reconcile,omitempty"`
+	Message          *Call_Message        `protobuf:"bytes,9,opt,name=message" json:"message,omitempty"`
+	XXX_unrecognized []byte               `json:"-"`
 }
 
 func (m *Call) Reset()         { *m = Call{} }
@@ -449,7 +423,7 @@ func (m *Call) GetType() Call_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Call_REGISTER
+	return 0
 }
 
 func (m *Call) GetRequest() *Call_Request {
@@ -622,7 +596,6 @@ func (m *Call_Acknowledge) GetUuid() []byte {
 }
 
 type Call_Reconcile struct {
-	// TODO(benh): Send TaskID's instead, see MESOS-1453.
 	Statuses         []*mesos.TaskStatus `protobuf:"bytes,1,rep,name=statuses" json:"statuses,omitempty"`
 	XXX_unrecognized []byte              `json:"-"`
 }

@@ -2,34 +2,18 @@
 // source: containerizer.proto
 // DO NOT EDIT!
 
-/*
-Package mesos_containerizer is a generated protocol buffer package.
-
-It is generated from these files:
-	containerizer.proto
-
-It has these top-level messages:
-	Launch
-	Update
-	Wait
-	Destroy
-	Usage
-	Termination
-	Containers
-*/
 package mesos_containerizer
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 import mesos "github.com/twitter/gozer/proto/mesos.pb"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
-// *
-// Encodes the launch command sent to the external containerizer
-// program.
 type Launch struct {
 	ContainerId      *mesos.ContainerID  `protobuf:"bytes,1,req,name=container_id" json:"container_id,omitempty"`
 	TaskInfo         *mesos.TaskInfo     `protobuf:"bytes,2,opt,name=task_info" json:"task_info,omitempty"`
@@ -102,9 +86,6 @@ func (m *Launch) GetCheckpoint() bool {
 	return false
 }
 
-// *
-// Encodes the update command sent to the external containerizer
-// program.
 type Update struct {
 	ContainerId      *mesos.ContainerID `protobuf:"bytes,1,req,name=container_id" json:"container_id,omitempty"`
 	Resources        []*mesos.Resource  `protobuf:"bytes,2,rep,name=resources" json:"resources,omitempty"`
@@ -129,9 +110,6 @@ func (m *Update) GetResources() []*mesos.Resource {
 	return nil
 }
 
-// *
-// Encodes the wait command sent to the external containerizer
-// program.
 type Wait struct {
 	ContainerId      *mesos.ContainerID `protobuf:"bytes,1,req,name=container_id" json:"container_id,omitempty"`
 	XXX_unrecognized []byte             `json:"-"`
@@ -148,9 +126,6 @@ func (m *Wait) GetContainerId() *mesos.ContainerID {
 	return nil
 }
 
-// *
-// Encodes the destroy command sent to the external containerizer
-// program.
 type Destroy struct {
 	ContainerId      *mesos.ContainerID `protobuf:"bytes,1,req,name=container_id" json:"container_id,omitempty"`
 	XXX_unrecognized []byte             `json:"-"`
@@ -167,9 +142,6 @@ func (m *Destroy) GetContainerId() *mesos.ContainerID {
 	return nil
 }
 
-// *
-// Encodes the usage command sent to the external containerizer
-// program.
 type Usage struct {
 	ContainerId      *mesos.ContainerID `protobuf:"bytes,1,req,name=container_id" json:"container_id,omitempty"`
 	XXX_unrecognized []byte             `json:"-"`
@@ -186,17 +158,11 @@ func (m *Usage) GetContainerId() *mesos.ContainerID {
 	return nil
 }
 
-// *
-// Information about a container termination, returned by the
-// containerizer to the slave.
 type Termination struct {
-	// A container may be killed if it exceeds its resources; this will
-	// be indicated by killed=true and described by the message string.
-	Killed  *bool   `protobuf:"varint,1,req,name=killed" json:"killed,omitempty"`
-	Message *string `protobuf:"bytes,2,req,name=message" json:"message,omitempty"`
-	// Exit status of the process.
-	Status           *int32 `protobuf:"varint,3,opt,name=status" json:"status,omitempty"`
-	XXX_unrecognized []byte `json:"-"`
+	Killed           *bool   `protobuf:"varint,1,req,name=killed" json:"killed,omitempty"`
+	Message          *string `protobuf:"bytes,2,req,name=message" json:"message,omitempty"`
+	Status           *int32  `protobuf:"varint,3,opt,name=status" json:"status,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *Termination) Reset()         { *m = Termination{} }
@@ -224,9 +190,6 @@ func (m *Termination) GetStatus() int32 {
 	return 0
 }
 
-// *
-// Information on all active containers returned by the containerizer
-// to the slave.
 type Containers struct {
 	Containers       []*mesos.ContainerID `protobuf:"bytes,1,rep,name=containers" json:"containers,omitempty"`
 	XXX_unrecognized []byte               `json:"-"`

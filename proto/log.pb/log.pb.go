@@ -2,32 +2,15 @@
 // source: log.proto
 // DO NOT EDIT!
 
-/*
-Package mesos_internal_log is a generated protocol buffer package.
-
-It is generated from these files:
-	log.proto
-
-It has these top-level messages:
-	Promise
-	Action
-	Metadata
-	Record
-	PromiseRequest
-	PromiseResponse
-	WriteRequest
-	WriteResponse
-	LearnedMessage
-	RecoverRequest
-	RecoverResponse
-*/
 package mesos_internal_log
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
 type Action_Type int32
@@ -56,6 +39,9 @@ func (x Action_Type) Enum() *Action_Type {
 }
 func (x Action_Type) String() string {
 	return proto.EnumName(Action_Type_name, int32(x))
+}
+func (x Action_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
 }
 func (x *Action_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Action_Type_value, data, "Action_Type")
@@ -96,6 +82,9 @@ func (x Metadata_Status) Enum() *Metadata_Status {
 func (x Metadata_Status) String() string {
 	return proto.EnumName(Metadata_Status_name, int32(x))
 }
+func (x Metadata_Status) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Metadata_Status) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Metadata_Status_value, data, "Metadata_Status")
 	if err != nil {
@@ -132,6 +121,9 @@ func (x Record_Type) Enum() *Record_Type {
 func (x Record_Type) String() string {
 	return proto.EnumName(Record_Type_name, int32(x))
 }
+func (x Record_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Record_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Record_Type_value, data, "Record_Type")
 	if err != nil {
@@ -141,16 +133,6 @@ func (x *Record_Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Represents a "promise" that a replica has made. A promise is
-// *implicitly* valid for _all_ future actions that get performed on
-// the replicated log (provided the action comes from the same
-// proposer), until a new promise is made to a proposer with a higher
-// proposal number. Each replica writes every promise it makes as a
-// log record so that it can recover this information after a failure.
-// TODO(benh): Does the promise actually need to be written to stable
-// storage? Can we get away with looking at the last written action
-// and using it's promised value? In this case, what happens if we
-// make a promise but don't receive an action from that coordinator?
 type Promise struct {
 	Proposal         *uint64 `protobuf:"varint,1,req,name=proposal" json:"proposal,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -167,13 +149,6 @@ func (m *Promise) GetProposal() uint64 {
 	return 0
 }
 
-// Represents an "action" performed on the log. Each action has an
-// associated position in the log. In addition, each action (i.e.,
-// position) will have been "promised" to a specific proposer
-// (implicitly or explicitly) and may have been "performed" from a
-// specific proposer. An action may also be "learned" to have reached
-// consensus. There are three types of possible actions that can be
-// performed on the log: nop (no action), append, and truncate.
 type Action struct {
 	Position         *uint64          `protobuf:"varint,1,req,name=position" json:"position,omitempty"`
 	Promised         *uint64          `protobuf:"varint,2,req,name=promised" json:"promised,omitempty"`
@@ -222,7 +197,7 @@ func (m *Action) GetType() Action_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Action_NOP
+	return 0
 }
 
 func (m *Action) GetNop() *Action_Nop {
@@ -294,10 +269,6 @@ func (m *Action_Truncate) GetTo() uint64 {
 	return 0
 }
 
-// The metadata of a replica. It has to be persisted on the disk. We
-// store the current status of the replica as well as the implicit
-// promise that a replica has made. This message is intended to
-// replace the old Promise message to support catch-up.
 type Metadata struct {
 	Status           *Metadata_Status `protobuf:"varint,1,req,name=status,enum=mesos.internal.log.Metadata_Status,def=4" json:"status,omitempty"`
 	Promised         *uint64          `protobuf:"varint,2,req,name=promised,def=0" json:"promised,omitempty"`
@@ -325,9 +296,6 @@ func (m *Metadata) GetPromised() uint64 {
 	return Default_Metadata_Promised
 }
 
-// Represents a log record written to the local filesystem by a
-// replica. A log record may store a promise (DEPRECATED), an action
-// or metadata (defined above).
 type Record struct {
 	Type             *Record_Type `protobuf:"varint,1,req,name=type,enum=mesos.internal.log.Record_Type" json:"type,omitempty"`
 	Promise          *Promise     `protobuf:"bytes,2,opt,name=promise" json:"promise,omitempty"`
@@ -344,7 +312,7 @@ func (m *Record) GetType() Record_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Record_PROMISE
+	return 0
 }
 
 func (m *Record) GetPromise() *Promise {
@@ -368,17 +336,6 @@ func (m *Record) GetMetadata() *Metadata {
 	return nil
 }
 
-// Represents a "promise" request from a proposer with the specified
-// 'proposal' to a replica. If the proposer is a coordinator, most
-// such requests will occur after a coordinator has failed and a new
-// coordinator is elected. In such a case, the position that the
-// coordinator is asking the replica to promise is implicitly *all*
-// positions that the replica has made no promises (thus the position
-// field is not be used). In other instances, however, a proposer
-// might be explicitly trying to request that a replica promise a
-// specific position in the log (such as when trying to fill holes
-// discovered during a client read), and then the 'position' field
-// will be present.
 type PromiseRequest struct {
 	Proposal         *uint64 `protobuf:"varint,1,req,name=proposal" json:"proposal,omitempty"`
 	Position         *uint64 `protobuf:"varint,2,opt,name=position" json:"position,omitempty"`
@@ -403,15 +360,6 @@ func (m *PromiseRequest) GetPosition() uint64 {
 	return 0
 }
 
-// Represents a "promise" response from a replica back to a proposer.
-// A replica represents a NACK (because it has promised a proposer
-// with a higher proposal number) by setting the okay field to false.
-// The 'proposal' is either the aforementioned higher proposal number
-// when the response is a NACK, or the corresponding request's
-// proposal number if it is an ACK. The replica either sends back the
-// highest position it has recorded in the log (using the 'position'
-// field) or the specific action (if any) it has at the position
-// requested in PromiseRequest (using the 'action' field).
 type PromiseResponse struct {
 	Okay             *bool   `protobuf:"varint,1,req,name=okay" json:"okay,omitempty"`
 	Proposal         *uint64 `protobuf:"varint,2,req,name=proposal" json:"proposal,omitempty"`
@@ -452,10 +400,6 @@ func (m *PromiseResponse) GetAction() *Action {
 	return nil
 }
 
-// Represents a write request for a specific type of action. Note that
-// we deliberately do not include the entire Action as it contains
-// fields that are not relevant to a write request (e.g., promised,
-// performed) and rather than ignore them we exclude them for safety.
 type WriteRequest struct {
 	Proposal         *uint64          `protobuf:"varint,1,req,name=proposal" json:"proposal,omitempty"`
 	Position         *uint64          `protobuf:"varint,2,req,name=position" json:"position,omitempty"`
@@ -496,7 +440,7 @@ func (m *WriteRequest) GetType() Action_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Action_NOP
+	return 0
 }
 
 func (m *WriteRequest) GetNop() *Action_Nop {
@@ -520,14 +464,6 @@ func (m *WriteRequest) GetTruncate() *Action_Truncate {
 	return nil
 }
 
-// Represents a write response corresponding to a write request. A
-// replica represents a NACK (because it has promised a proposer with
-// a higher proposal number) by setting the okay field to false. If
-// the proposer is a coordinator, then it has been demoted. The
-// 'position' should always correspond to the position set in the
-// request. The 'proposal' is either the same proposal number set in
-// the request in the case of an ACK, or the higher proposal number
-// this position has been promised to in the case of a NACK.
 type WriteResponse struct {
 	Okay             *bool   `protobuf:"varint,1,req,name=okay" json:"okay,omitempty"`
 	Proposal         *uint64 `protobuf:"varint,2,req,name=proposal" json:"proposal,omitempty"`
@@ -560,8 +496,6 @@ func (m *WriteResponse) GetPosition() uint64 {
 	return 0
 }
 
-// Represents a "learned" event, that is, when a particular action has
-// been agreed upon (reached consensus).
 type LearnedMessage struct {
 	Action           *Action `protobuf:"bytes,1,req,name=action" json:"action,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -578,8 +512,6 @@ func (m *LearnedMessage) GetAction() *Action {
 	return nil
 }
 
-// Represents a recover request. A recover request is used to initiate
-// the recovery (by broadcasting it).
 type RecoverRequest struct {
 	XXX_unrecognized []byte `json:"-"`
 }
@@ -588,8 +520,6 @@ func (m *RecoverRequest) Reset()         { *m = RecoverRequest{} }
 func (m *RecoverRequest) String() string { return proto.CompactTextString(m) }
 func (*RecoverRequest) ProtoMessage()    {}
 
-// When a replica receives a RecoverRequest, it will reply with its
-// current status, and the begin and the end of its current log.
 type RecoverResponse struct {
 	Status           *Metadata_Status `protobuf:"varint,1,req,name=status,enum=mesos.internal.log.Metadata_Status" json:"status,omitempty"`
 	Begin            *uint64          `protobuf:"varint,2,opt,name=begin" json:"begin,omitempty"`
@@ -605,7 +535,7 @@ func (m *RecoverResponse) GetStatus() Metadata_Status {
 	if m != nil && m.Status != nil {
 		return *m.Status
 	}
-	return Metadata_VOTING
+	return 0
 }
 
 func (m *RecoverResponse) GetBegin() uint64 {

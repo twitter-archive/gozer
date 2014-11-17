@@ -2,23 +2,15 @@
 // source: state.proto
 // DO NOT EDIT!
 
-/*
-Package mesos_internal_state is a generated protocol buffer package.
-
-It is generated from these files:
-	state.proto
-
-It has these top-level messages:
-	Entry
-	Operation
-*/
 package mesos_internal_state
 
 import proto "code.google.com/p/goprotobuf/proto"
+import json "encoding/json"
 import math "math"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference proto, json, and math imports to suppress error if they are not otherwise used.
 var _ = proto.Marshal
+var _ = &json.SyntaxError{}
 var _ = math.Inf
 
 type Operation_Type int32
@@ -45,6 +37,9 @@ func (x Operation_Type) Enum() *Operation_Type {
 func (x Operation_Type) String() string {
 	return proto.EnumName(Operation_Type_name, int32(x))
 }
+func (x Operation_Type) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.String())
+}
 func (x *Operation_Type) UnmarshalJSON(data []byte) error {
 	value, err := proto.UnmarshalJSONEnum(Operation_Type_value, data, "Operation_Type")
 	if err != nil {
@@ -54,7 +49,6 @@ func (x *Operation_Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Describes a state entry, a versioned (via a UUID) key/value pair.
 type Entry struct {
 	Name             *string `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
 	Uuid             []byte  `protobuf:"bytes,2,req,name=uuid" json:"uuid,omitempty"`
@@ -87,7 +81,6 @@ func (m *Entry) GetValue() []byte {
 	return nil
 }
 
-// Describes an operation used in the log storage implementation.
 type Operation struct {
 	Type             *Operation_Type     `protobuf:"varint,1,req,name=type,enum=mesos.internal.state.Operation_Type" json:"type,omitempty"`
 	Snapshot         *Operation_Snapshot `protobuf:"bytes,2,opt,name=snapshot" json:"snapshot,omitempty"`
@@ -103,7 +96,7 @@ func (m *Operation) GetType() Operation_Type {
 	if m != nil && m.Type != nil {
 		return *m.Type
 	}
-	return Operation_SNAPSHOT
+	return 0
 }
 
 func (m *Operation) GetSnapshot() *Operation_Snapshot {
@@ -120,7 +113,6 @@ func (m *Operation) GetExpunge() *Operation_Expunge {
 	return nil
 }
 
-// Describes a "snapshot" operation.
 type Operation_Snapshot struct {
 	Entry            *Entry `protobuf:"bytes,1,req,name=entry" json:"entry,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
@@ -137,7 +129,6 @@ func (m *Operation_Snapshot) GetEntry() *Entry {
 	return nil
 }
 
-// Describes an "expunge" operation.
 type Operation_Expunge struct {
 	Name             *string `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
