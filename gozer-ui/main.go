@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	rootHTML = `
-	<!DOCTYPE html>
+	rootHTML = `<!DOCTYPE html>
 	<html>
 		<head>
 			<meta charset="utf-8">
