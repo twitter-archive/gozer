@@ -1,1 +1,1 @@
-s/^import mesos "mesos\.pb"$/import mesos "github.com\/twitter\/gozer\/proto\/mesos.pb"/
+s/^import mesos "mesos\/mesos\.pb"$/import mesos "github.com\/twitter\/gozer\/proto\/mesos.pb"/
