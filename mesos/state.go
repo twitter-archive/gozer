@@ -9,7 +9,11 @@ func (d *Driver) Run() {
 	for state := stateInit; state != nil; {
 		state = state(d)
 	}
-	// TODO(dhamon): signal framework that the driver has stopped.
+	// Close channels to indicate driver state machine is done.
+	close(d.Updates)
+	close(d.Offers)
+	close(d.events)
+	close(d.command)
 }
 
 func stateStop(d *Driver) stateFn {

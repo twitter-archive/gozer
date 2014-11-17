@@ -29,8 +29,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Error.Printf("Failed to parse JSON body from addtask request %+v: %+v", r, err)
-		// TODO(dhamon): Better error for this case.
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
